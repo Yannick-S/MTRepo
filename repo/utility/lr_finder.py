@@ -104,16 +104,12 @@ class LRFinder(object):
         for iteration in tqdm(range(num_iter)):
             # Get a new set of inputs and labels
             try:
-                #inputs, labels = next(iterator)
                 data = next(iterator)
-                inputs = data
-                labels = data.y
+                inputs, labels = data, data.y
             except StopIteration:
                 iterator = iter(train_loader)
-                #inputs, labels = next(iterator)
                 data = next(iterator)
-                inputs = data
-                labels = data.y
+                inputs, labels = data, data.y
 
             # Train on batch and retrieve loss
             loss = self._train_batch(inputs, labels)
@@ -138,7 +134,6 @@ class LRFinder(object):
             if loss > diverge_th * self.best_loss:
                 print("Stopping early, the loss has diverged")
                 break
-
         print("Learning rate search finished. See the graph with {finder_name}.plot()")
 
     def _train_batch(self, inputs, labels):
