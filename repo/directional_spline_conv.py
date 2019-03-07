@@ -83,7 +83,7 @@ from torch_geometric.nn import knn_graph
 import torch.nn.functional as F
 
 class SampleNetDC(torch.nn.Module):
-    def __init__(self, nr_points, k,l, nr_filters, filter_size,  nr_classes,):
+    def __init__(self, nr_points, k,l, nr_filters, filter_size,  nr_classes):
         super(SampleNetDC, self).__init__()
 
         self.k = k
