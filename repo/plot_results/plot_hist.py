@@ -1,12 +1,26 @@
 import matplotlib.pyplot as plt
 
-def plot_hist(training_history):
-    n = len(training_history['nll'])
-    plt.plot(range(n), training_history['nll'], 'dodgerblue', label='nll')
-    plt.plot(range(n), training_history['acc'], 'orange', label='acc')
+def plot_hist_loss(training_history, color='dodgerblue', show=False):
+    n = len(training_history)
+    plt.plot(range(n), training_history, color)
     plt.xlim(0, n)
     plt.xlabel('Epoch')
-    plt.ylabel('BCE')
-    plt.title('Binary Cross Entropy on Training/Validation Set')
-    plt.legend()
-    plt.show()
+    plt.ylabel('NLL')
+    plt.title('Negative Log Likelyhood')
+    if show:
+        plt.show()
+
+def plot_hist_acc(training_history, color='orange', show=False):
+    n = len(training_history)
+    plt.plot(range(n), training_history, color)
+    plt.xlim(0, n)
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy')
+    if show:
+        plt.show()
+
+def save_plot(path):
+    plt.savefig(path, format='eps', dpi=1000)
+    plt.clf()
+    plt.cla()
