@@ -147,7 +147,7 @@ from event_handlers.save_img import log_img
 trainer.add_event_handler(
             Events.EPOCH_COMPLETED,
             log_img, 
-            training_history, path, start_epoch)
+            save_every, training_history, path, start_epoch)
 
 
 pbar = tqdm(total=max_epochs)
