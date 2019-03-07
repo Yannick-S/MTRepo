@@ -83,19 +83,20 @@ from torch_geometric.nn import knn_graph
 import torch.nn.functional as F
 
 class SampleNetDC(torch.nn.Module):
-    def __init__(self, nr_points, k, nr_classes):
+    def __init__(self, nr_points, k,l, nr_filters, filter_size,  nr_classes,):
         super(SampleNetDC, self).__init__()
 
         self.k = k
+        self.l = l
         self.nr_points = nr_points
         self.nr_classes = nr_classes
         
-        self.filter_nr= 15
-        self.kernel_size = 10
+        self.filter_nr= nr_filters
+        self.kernel_size = filter_size
 
         self.dsc = DirectionalSplineConv(filter_nr=self.filter_nr,
                                             kernel_size=self.kernel_size,
-                                            l=9,
+                                            l=self.l,
                                             k=self.k)
 
         self.nn1 = torch.nn.Linear(self.filter_nr, 256)

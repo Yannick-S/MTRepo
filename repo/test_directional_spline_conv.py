@@ -16,6 +16,9 @@ experiment = {
     "nr_points": 100,
     ### Net
     "k": 20,
+    "l": 9,
+    "nr_filters": 15,
+    "filter_size": 10,
     ### Learning
     "batch_size": 7,
     "learning_rate": 0.001
@@ -57,6 +60,9 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = SampleNetDC(
     k=experiment['k'],
+    l=experiment['l'],
+    filter_size=experiment['filter_size'],
+    nr_filters=experiment['nr_filters'],
     nr_points=experiment['nr_points'],
     nr_classes=experiment['nr_classes']
     ).to(device)
@@ -88,15 +94,19 @@ from plot_results.setup_file import save_file, load_file
 
 if load_from_file:
     checkpoint = torch.load(load_path)
+    experiment_loaded = load_file(os.path.dirname(load_path) + '/experiment.json')
+    assert experiment_loaded['nr_points'] == experiment['nr_points'], "Not the same amount of 'nr_points'. Loading has {} and now has {}".format(experiment_loaded['nr_points'], experiment['nr_points'])
+    assert experiment_loaded['k'] == experiment['k'], "Not the same 'k'. Loading has {} and now has {}".format(experiment_loaded['k'], experiment['k'])
+    assert experiment_loaded['l'] == experiment['l'], "Not the same 'l'. Loading has {} and now has {}".format(experiment_loaded['l'], experiment['l'])
+    assert experiment_loaded['filter_size'] == experiment['filter_size'], "Not the same 'filter_size'. Loading has {} and now has {}".format(experiment_loaded['filter_size'], experiment['filter_size'])
+    assert experiment_loaded['nr_filters'] == experiment['nr_filters'], "Not the same 'nr_filters'. Loading has {} and now has {}".format(experiment_loaded['nr_filters'], experiment['nr_filters'])
+    assert experiment_loaded['nr_classes'] == experiment['nr_classes'], "Not the same 'nr_classes'. Loading has {} and now has {}".format(experiment_loaded['nr_classes'], experiment['nr_classes'])
+    path = os.path.dirname(load_path) + '/'
+
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     training_history = checkpoint['training_history']
     start_epoch = checkpoint['epoch']
-    experiment_loaded = load_file(os.path.dirname(load_path) + '/experiment.json')
-    assert experiment_loaded['nr_points'] == experiment['nr_points'], "Not the same amount of 'nr_points'. Loading has {} and now has {}".format(experiment_loaded['nr_points'], experiment['nr_points'])
-    assert experiment_loaded['k'] == experiment['k'], "Not the same 'k'. Loading has {} and now has {}".format(experiment_loaded['k'], experiment['k'])
-    assert experiment_loaded['nr_classes'] == experiment['nr_classes'], "Not the same 'nr_classes'. Loading has {} and now has {}".format(experiment_loaded['nr_classes'], experiment['nr_classes'])
-    path = os.path.dirname(load_path) + '/'
 
 else:
     training_history = {'nll': [], 'acc': []}
