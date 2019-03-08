@@ -1,5 +1,5 @@
 import os
-load_from_file = True 
+load_from_file = False 
 if load_from_file:
     all_dirs = os.listdir('checkpoint')
     sorted_dirs = sorted(all_dirs)
@@ -13,19 +13,20 @@ if load_from_file:
 
 experiment = {
     ### Data
-    "nr_points": 100,
+    "nr_points": 500,
     ### Net
     "k": 20,
     "l": 9,
     "nr_filters": 15,
     "filter_size": 10,
     ### Learning
-    "batch_size": 7,
-    "learning_rate": 0.001
+    "batch_size": 26,
+    "learning_rate": 0.0001
 }
 
-max_epochs = 30
-save_every = 3
+max_epochs = 121
+save_every = 30
+
 
 ### don't touch this:
 start_epoch = 0
@@ -156,3 +157,9 @@ def show_bar(engine):
     pbar.update(1)
 trainer.run(train_loader, max_epochs=max_epochs)
 pbar.close()
+
+############ show results
+from plot_results.plot_hist import plot_hist_loss, plot_hist_acc
+
+plot_hist_loss(training_history['nll'], show=True)
+plot_hist_acc(training_history['acc'], show=True)

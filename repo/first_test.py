@@ -9,12 +9,26 @@ from torch_geometric.datasets.geometry import GeometricShapes
 from directional_spline_conv import DirectionalSplineConv
 
 from utility.utility import plot_point_cloud
-#### Load Data ####
-batch_size = 6
-nr_points = 500
-k = 20
 
-trans = Compose((SamplePoints(nr_points),
+#### Load Experiment ####
+import os
+from plot_results.setup_file import save_file, load_file
+
+all_dirs = os.listdir('checkpoint')
+sorted_dirs = sorted(all_dirs)
+last_dir = sorted_dirs[-1]
+all_files = os.listdir('checkpoint/'+last_dir)
+all_files = [f for f in all_files if "epoch_" in f]
+all_files = [f for f in all_files if f[-4:] == '.pth']
+all_files = sorted(all_files)
+load_path = 'checkpoint/' + last_dir + '/' + all_files[-1]
+print(load_path)
+checkpoint = torch.load(load_path, map_location='cpu')
+
+experiment = load_file(os.path.dirname(load_path) + '/experiment.json')
+experiment['batch_size'] = 1
+########### Load DataSet ###############
+trans = Compose((SamplePoints(experiment['nr_points']),
         NormalizeScale(),
         RandomTranslate(0.01),
         RandomRotate(180)))
@@ -22,90 +36,62 @@ trans = Compose((SamplePoints(nr_points),
 #dataset = ModelNet(root='MN', name="10", train=True, transform=trans)
 dataset = GeometricShapes('data/geometric', train=True, transform=trans)
 nr_classes = len(dataset)
+#experiment['nr_classes'] = len(dataset)
 
 dataset = dataset.shuffle()
-test_loader = DataLoader(dataset, batch_size=batch_size)
-train_loader = DataLoader(dataset, batch_size=batch_size)
+test_loader  = DataLoader(dataset,  batch_size =experiment['batch_size'])
+train_loader = DataLoader(dataset, batch_size=experiment['batch_size'])
 
-#### Define Model ####
-class Net(torch.nn.Module):
-    def __init__(self):
-        self.k = k
-        super(Net, self).__init__()
-        
-        self.filter_nr= 15
-        self.kernel_size = 10
-
-        self.dsc = DirectionalSplineConv(filter_nr=self.filter_nr,
-                                            kernel_size=self.kernel_size,
-                                            l=9,
-                                            k=self.k)
-
-        self.nn1 = torch.nn.Linear(self.filter_nr, 256)
-        self.nn2 = torch.nn.Linear(256, nr_classes)
-
-        self.sm = torch.nn.LogSoftmax(dim=1)
-
-        self.counter = 0 
-
-    def forward(self, data):
-        self.counter += 1
-        pos, edge_index, batch = data.pos, data.edge_index, data.batch
-
-        edge_index = knn_graph(pos, self.k, batch, loop=False)
-
-        y = self.dsc(pos, edge_index) 
-
-        y = torch.sigmoid(y)
-        if self.counter > 300:
-            y3 = y.view(-1, nr_points,self.filter_nr)
-            color = y[:nr_points,:3].detach().numpy()
-            plot_point_cloud(pos[:nr_points,:].detach().numpy(),color=color)
-        y = y.view(-1, nr_points,self.filter_nr)
-        y = y.mean(dim=1).view(-1, self.filter_nr)
-        y1 = self.nn1(y)
-        y1 = F.elu(y1)
-        y2 = self.nn2(y1)
-        y2 = self.sm(y2) 
-            
-        return y2
 
 ### Setup Experiment
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(device)
-model = Net().to(device)
-optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+import torch
+from directional_spline_conv import SampleNetDC
 
-loss_f = torch.nn.NLLLoss()
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+model = SampleNetDC(
+    k=experiment['k'],
+    l=experiment['l'],
+    filter_size=experiment['filter_size'],
+    nr_filters=experiment['nr_filters'],
+    nr_points=experiment['nr_points'],
+    nr_classes=experiment['nr_classes'],
+    out_y=True
+    ).to(device)
+
+optimizer = torch.optim.Adam(model.parameters(), lr=experiment['learning_rate'])
+loss = torch.nn.NLLLoss()
+
+### load model
+
+
+experiment_loaded = load_file(os.path.dirname(load_path) + '/experiment.json')
+assert experiment_loaded['nr_points'] == experiment['nr_points'], "Not the same amount of 'nr_points'. Loading has {} and now has {}".format(experiment_loaded['nr_points'], experiment['nr_points'])
+assert experiment_loaded['k'] == experiment['k'], "Not the same 'k'. Loading has {} and now has {}".format(experiment_loaded['k'], experiment['k'])
+assert experiment_loaded['l'] == experiment['l'], "Not the same 'l'. Loading has {} and now has {}".format(experiment_loaded['l'], experiment['l'])
+assert experiment_loaded['filter_size'] == experiment['filter_size'], "Not the same 'filter_size'. Loading has {} and now has {}".format(experiment_loaded['filter_size'], experiment['filter_size'])
+assert experiment_loaded['nr_filters'] == experiment['nr_filters'], "Not the same 'nr_filters'. Loading has {} and now has {}".format(experiment_loaded['nr_filters'], experiment['nr_filters'])
+#assert experiment_loaded['nr_classes'] == experiment['nr_classes'], "Not the same 'nr_classes'. Loading has {} and now has {}".format(experiment_loaded['nr_classes'], experiment['nr_classes'])
+path = os.path.dirname(load_path) + '/'
+
+model.load_state_dict(checkpoint['model_state_dict'])
+optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+training_history = checkpoint['training_history']
+start_epoch = checkpoint['epoch']
 
 #### Define Train and Eval Funcs ####
-def train(epoch):
-    model.train()
+def show(epoch):
+    model.eval()
 
-    loss_all = 0
-    correct = 0
     for data in train_loader:
         data = data.to(device)
-        optimizer.zero_grad()
 
-        output = model(data)
-        
-        loss = loss_f(output, data.y)
+        output, y = model(data)
 
-        loss.backward()
-        loss_all += data.num_graphs * loss.item()
-        optimizer.step()
-
-        for i in range(output.size(0)): 
-            if output[i,:].max(dim=0)[1] == data.y[i]:
-                correct += 1
-
-    print("correct: ", correct, "loss: ", loss_all)
-    return loss_all / len(dataset)
+        plot_point_cloud(data.pos.detach().numpy(), color=y[:,:3].detach().numpy())
 
 #### execute Training ####
 for epoch in range(1, 20001):
     print("Epoch:", epoch)
-    loss = train(epoch)
-    
+    show(epoch)    
 
