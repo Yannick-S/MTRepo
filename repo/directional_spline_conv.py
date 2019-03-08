@@ -83,8 +83,9 @@ from torch_geometric.nn import knn_graph
 import torch.nn.functional as F
 
 class SampleNetDC(torch.nn.Module):
-    def __init__(self, nr_points, k,l, nr_filters, filter_size,  nr_classes):
+    def __init__(self, nr_points, k,l, nr_filters, filter_size,  nr_classes, out_y=False):
         super(SampleNetDC, self).__init__()
+        self.out_y = out_y
 
         self.k = k
         self.l = l
@@ -111,12 +112,14 @@ class SampleNetDC(torch.nn.Module):
 
         y = self.dsc(pos, edge_index) 
 
-        ys = torch.sigmoid(y)
-        ys = ys.view(-1, self.nr_points , self.filter_nr)
+        y = torch.sigmoid(y)
+        ys = y.view(-1, self.nr_points , self.filter_nr)
         ys = ys.mean(dim=1).view(-1, self.filter_nr)
         y1 = self.nn1(ys)
         y1 = F.elu(y1)
         y2 = self.nn2(y1)
         y2 = self.sm(y2) 
             
+        if self.out_y:
+            return y2, y
         return y2
