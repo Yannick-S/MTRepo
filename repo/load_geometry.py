@@ -11,12 +11,12 @@ from directional_spline_conv import DirectionalSplineConv
 from utility.utility import plot_point_cloud
 #### Load Data ####
 batch_size = 1
-nr_points = 500
-k = 20
+nr_points = 2500
+k = 2
 
 trans = Compose((SamplePoints(nr_points),
         NormalizeScale(),
-        RandomTranslate(0.01),
+        RandomTranslate(0),
         RandomRotate(180)))
 
 #dataset = ModelNet(root='MN', name="10", train=True, transform=trans)
@@ -31,11 +31,17 @@ train_loader = DataLoader(dataset, batch_size=batch_size)
 
 #### Define Train and Eval Funcs ####
 from utility.utility import plot_point_cloud
+import matplotlib.pyplot as plt
 
 def train(epoch):
 
     for data in train_loader:
-        plot_point_cloud(data.pos)
+        plot_point_cloud(data.pos, color='angle', show=False)
+
+        plt.savefig('img/'+str(data.y.item()) + '.png', format='png', dpi=1000)
+        plt.clf()
+        plt.cla()
+    quit()
     return 0
 
 #### execute Training ####

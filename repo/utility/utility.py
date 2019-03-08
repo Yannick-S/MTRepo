@@ -3,7 +3,7 @@ import torch
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-def plot_point_cloud(point_cloud_in, color='C0', alpha=1, arrow=None, show=True, ax=None):
+def plot_point_cloud(point_cloud_in, color='C0', alpha=1, arrow=None, show=True, ax=None, path=None):
 
     if type(point_cloud_in) == torch.Tensor:
         point_cloud = point_cloud_in.clone()
@@ -50,6 +50,18 @@ def plot_point_cloud(point_cloud_in, color='C0', alpha=1, arrow=None, show=True,
         fig = plt.figure()
         ax = Axes3D(fig)
         ax.set_aspect('equal')
+
+    if color=='angle':
+        color = np.zeros((point_cloud.shape[0]-1,3))
+        print(color.shape)
+        #color[:,0]= np.arctan2(point_cloud[:-1,0], point_cloud[:-1,1])
+        #color[:,1]= np.arctan2(point_cloud[:-1,1], point_cloud[:-1,2])
+        #color[:,2]= np.arctan2(point_cloud[:-1,2], point_cloud[:-1,0])
+        color[:,0]= point_cloud[:-1,0]
+        color[:,1]= point_cloud[:-1,1]
+        color[:,2]= point_cloud[:-1,2]
+        color = color - color.min()
+        color = color / color.max()
     #ax.scatter(point_cloud[:,0], point_cloud[:,1], point_cloud[:,2])
     ax.scatter(point_cloud[:-1,0], point_cloud[:-1,1], point_cloud[:-1,2],color=color, alpha=alpha)
     ax.scatter(point_cloud[-1,0], point_cloud[-1,1], point_cloud[-1,2], alpha=0)
@@ -78,7 +90,11 @@ def plot_point_cloud(point_cloud_in, color='C0', alpha=1, arrow=None, show=True,
             arrow[2,:]*0.1,
             color=['b','g','r'])
 
-    if show:
+    if path:
+        plt.savefig(path, format='png', dpi=1000)
+        plt.clf()
+        plt.cla()
+    elif show:
         plt.show()
     else:
         return ax

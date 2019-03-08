@@ -88,7 +88,9 @@ def show(epoch):
 
         output, y = model(data)
 
-        plot_point_cloud(data.pos.detach().numpy(), color=y[:,:3].detach().numpy())
+        plot_point_cloud(data.pos.detach().numpy(), color=y[:,3:6].detach().numpy(), path='img_conv/'+str(data.y.item()) + '.png')
+
+    quit()
 
 #### execute Training ####
 for epoch in range(1, 20001):
