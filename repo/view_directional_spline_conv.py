@@ -26,7 +26,7 @@ print(load_path)
 checkpoint = torch.load(load_path, map_location='cpu')
 
 experiment = load_file(os.path.dirname(load_path) + '/experiment.json')
-experiment['batch_size'] = 1
+experiment['batch_size'] = 10
 ########### Load DataSet ###############
 trans = Compose((SamplePoints(experiment['nr_points']),
         NormalizeScale(),
@@ -88,7 +88,17 @@ def show(epoch):
 
         output, y = model(data)
 
-        plot_point_cloud(data.pos.detach().numpy(), color=y[:,3:6].detach().numpy(), path='img_conv/'+str(data.y.item()) + '.png')
+        y1 = y.detach()
+        y1 = y1[:experiment['nr_points']]
+        y1 = y1[:,torch.tensor((1,4,5), dtype=torch.long)]
+
+        #save:
+        #plot_point_cloud(data.pos.detach().numpy(),
+        #color=y[:,3:6].detach().numpy(), path='img_conv/'+str(data.y.item()) +
+        #'.png')
+        
+        # view:
+        plot_point_cloud(data.pos[:experiment['nr_points']].detach().numpy(), color=y1.numpy())
 
     quit()
 
