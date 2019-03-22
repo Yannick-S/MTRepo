@@ -23,15 +23,15 @@ class DirectionalSplineConvTIME(MessagePassing):
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        self.tt1 = TicToc(name='Batch     ')
-        self.tt2 = TicToc(name='To SplineC')
-        self.tt3 = TicToc(name='SplineConv')
-        self.tt4 = TicToc(name='After SC  ')
+        self.tt1 = TicToc(name='Clusters  ')
+        self.tt2 = TicToc(name='Cov mat   ')
+        self.tt3 = TicToc(name='diag      ')
+        self.tt4 = TicToc(name='transform ')
         self.counter = 0
 
     def forward(self, x, edge_index):
         self.counter += 1
-        if self.counter % 400 == 0:
+        if self.counter % 40 == 0:
             print(str(self.tt1))
             print(str(self.tt2))
             print(str(self.tt3))
