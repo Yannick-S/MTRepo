@@ -8,7 +8,7 @@ from utility.utility import plot_point_cloud
 from utility.tictoc import TicToc
 import sys
 
-temp = sys.stdout
+
 class DirectionalSplineConvTIME(MessagePassing):
     def __init__(self, filter_nr, l, k, kernel_size):
         super(DirectionalSplineConvTIME, self).__init__()
@@ -30,6 +30,7 @@ class DirectionalSplineConvTIME(MessagePassing):
         self.counter = 0
 
     def forward(self, x, edge_index):
+        temp = sys.stdout
         self.counter += 1
         temp.write(str(self.counter) + '\n')
         if self.counter % 4 == 0:
