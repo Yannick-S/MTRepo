@@ -42,10 +42,9 @@ class DirectionalSplineConvTIME(MessagePassing):
         clusters = clusters.view(-1,self.k,3)
 
         # get covariance matrices:
-        cov_mat = torch.zeros((x.size(0), 3 , 3), device=self.device)
         clusters_t = torch.transpose(clusters,dim0=1,dim1=2)
         self.tt1.tic()
-        cov_mat2 = torch.bmm( clusters_t[:,:,:self.l], clusters[:,:self.l,:])
+        cov_mat = torch.bmm( clusters_t[:,:,:self.l], clusters[:,:self.l,:])
         self.tt1.toc()
 
         # get the projections
