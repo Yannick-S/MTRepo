@@ -6,7 +6,9 @@ from torch.nn import BatchNorm1d
 from utility.diag import diag
 from utility.utility import plot_point_cloud
 from utility.tictoc import TicToc
+import sys
 
+temp = sys.stdout
 class DirectionalSplineConvTIME(MessagePassing):
     def __init__(self, filter_nr, l, k, kernel_size):
         super(DirectionalSplineConvTIME, self).__init__()
@@ -29,12 +31,13 @@ class DirectionalSplineConvTIME(MessagePassing):
 
     def forward(self, x, edge_index):
         self.counter += 1
-        print(self.counter)
+        temp.write(str(self.counter) + '\n')
         if self.counter % 4 == 0:
-            print(self.tt1)
-            print(self.tt2)
-            print(self.tt3)
-            print(self.tt4)
+            temp.write(str(self.tt1) + '\n')
+            temp.write(str(self.tt2) + '\n')
+            temp.write(str(self.tt3) + '\n')
+            temp.write(str(self.tt4) + '\n')
+        temp.flush()
 
         self.tt1.tic()
         self.tt2.tic()
