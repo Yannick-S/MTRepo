@@ -31,25 +31,26 @@ class DirectionalSplineConvTIME(MessagePassing):
 
     def forward(self, x, edge_index):
         self.counter += 1
+        print(self.device)
         if self.counter % 40 == 0:
             print(str(self.tt1))
             print(str(self.tt2))
             print(str(self.tt3))
             print(str(self.tt4))
 
-        self.tt1.tic()
         # center the clusters, make view
         clusters = x[edge_index[1,:]] - x[edge_index[0,:]]
         clusters = clusters.view(-1,self.k,3)
-        self.tt1.toc()
 
-        self.tt2.tic()
         # get covariance matrices:
         cov_mat = torch.zeros((x.size(0), 3 , 3), device=self.device)
         for i in range(x.size(0)):
+            self.tt1.tic()
             cov_cluster  = clusters[i,:self.l,:]
+            self.tt1.toc()
+            self.tt2.tic()
             cov_mat[i,:,:] = torch.matmul(cov_cluster.t(), cov_cluster)
-        self.tt2.toc()
+            self.tt2.toc()
         # get the projections
         self.tt3.tic()
         S, V = diag(cov_mat, nr_iterations=5, device=self.device)
