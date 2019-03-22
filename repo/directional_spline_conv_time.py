@@ -38,41 +38,34 @@ class DirectionalSplineConvTIME(MessagePassing):
             print(str(self.tt4))
 
         self.tt1.tic()
-        self.tt2.tic()
         # center the clusters, make view
-        print("x", x.get_device())
         clusters = x[edge_index[1,:]] - x[edge_index[0,:]]
         clusters = clusters.view(-1,self.k,3)
-        print("clusters", clusters.get_device())
+        self.tt1.toc()
 
+        self.tt2.tic()
         # get covariance matrices:
         cov_mat = torch.zeros((x.size(0), 3 , 3), device=self.device)
-        print("cov_mat", cov_mat.get_device())
         for i in range(x.size(0)):
             cov_cluster  = clusters[i,:self.l,:]
             cov_mat[i,:,:] = torch.matmul(cov_cluster.t(), cov_cluster)
-
-        print("cov_mat", cov_mat.get_device())
+        self.tt2.toc()
         # get the projections
+        self.tt3.tic()
         S, V = diag(cov_mat, nr_iterations=5, device=self.device)
-        print("S", S.get_device())
-        print("V", V.get_device())
+        self.tt3.toc()
 
         # apply projections to clusters
+        self.tt4.tic()
         directional_clusters = torch.bmm(clusters, torch.transpose(V, 1,2)) 
-        print("dir_c", directional_clusters.get_device())
         signs = directional_clusters[:,:,2].sum(dim=1).sign()
-        print("signs", signs.get_device())
         directional_clusters[:,:,2] = directional_clusters[:,:,2] * signs.view(-1,1)
-        print("dir_c", directional_clusters.get_device())
         max_abs = directional_clusters.abs(
                     ).view(-1,self.k*3
                     ).max(dim=1)[0]
-        print("max_abs", max_abs.get_device())
         directional_clusters = directional_clusters/max_abs.view(-1,1,1)
-        print("dir_c", directional_clusters.get_device())
         directional_clusters = directional_clusters*0.5 +0.5
-        print("dir_c", directional_clusters.get_device())
+        self.tt4.toc()
 
         #plot_point_cloud(clusters[0,:,:])
         #plot_point_cloud(directional_clusters[0,:,:])
@@ -80,30 +73,21 @@ class DirectionalSplineConvTIME(MessagePassing):
         #prepare output
             #out_dir = torch.zeros(x.size(0), self.filter_nr, 3).to(self.device)
         out_nondir = torch.zeros((x.size(0),self.filter_nr),device=self.device)
-        print("out_nondir", out_nondir.get_device())
 
         # prepare edges
         ones  = torch.ones((self.k),device=self.device).view(1, self.k)
-        print("ones", ones.get_device())
         linsp = torch.linspace(0,x.size(0) - 1, steps=x.size(0), device=self.device).view(x.size(0),1)
         linsp = linsp * self.k
-        print("linsp", linsp.get_device())
 
         cluster_edge      = torch.zeros((2, x.size(0)*self.k), device=self.device, dtype=torch.long)
         cluster_edge[0,:] = torch.matmul(linsp, ones).view(-1)
         cluster_edge[1,:] = torch.linspace(0, x.size(0)*self.k-1, steps=x.size(0)*self.k, device=self.device)
-        print("cluster_edge", cluster_edge.get_device())
 
         # prepare pseudo 
         ones  = torch.ones((self.k*x.size(0)), device=self.device)
 
         # conv
-        self.tt2.toc()
-        self.tt3.tic()
         conv_out = self.conv(ones, cluster_edge, directional_clusters.view(-1,3))
-        print("conv_out", conv_out.get_device())
-        self.tt3.toc()
-        self.tt4.tic()
 
         # extract important results
         linsp = torch.linspace(0, x.size(0) - 1, steps=x.size(0), device=self.device) * self.k
@@ -113,8 +97,6 @@ class DirectionalSplineConvTIME(MessagePassing):
         # batch NR
         out_bn = self.bn(out_nondir)
 
-        self.tt1.toc()
-        self.tt4.toc()
         return out_bn
 
 
