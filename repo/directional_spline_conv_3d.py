@@ -74,16 +74,12 @@ class DirectionalSplineConv3D(MessagePassing):
 
         # batch NR
         out_bn = self.bn(out_nondir)
-        out_bn = out_bn.view(-1,1,self.filter_nr).repeat(1,3,1)
-
-        out = V[:,2].view(-1,3,1).repeat(1,1,self.filter_nr)
-
-        out = torch.mul(out_bn, out)
 
         # rotate results back
-        #out = 
+        out_bn = out_bn.view(-1,1,self.filter_nr).repeat(1,3,1)
+        out = V[:,2].view(-1,3,1).repeat(1,1,self.filter_nr)
+        out = torch.mul(out_bn, out)
 
-        quit()
         return out 
 
 
