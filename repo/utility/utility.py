@@ -78,17 +78,21 @@ def plot_point_cloud(point_cloud_in, color='C0', alpha=1, arrow=None, show=True,
             assert False, "arrow is neither of type np.ndarray or torch.Tensor, it is " + type(arrow) 
 
         zero = np.zeros(arrow.shape) 
+        arrow = arrow/arrow.max()/2
 
-        ax.quiver(zero[:,0], zero[:,1], zero[:,2],
-            arrow[0,:]*0.3,
-            arrow[1,:]*0.3,
-            arrow[2,:]*0.3,
-            color=['b','g','r'])
-        ax.quiver(zero[:,0], zero[:,1], zero[:,2],
-            arrow[0,:]*0.1,
-            arrow[1,:]*0.1,
-            arrow[2,:]*0.1,
-            color=['b','g','r'])
+        for i in range(length):
+            color = 'C' + str(i)
+            ax.quiver(0,0,0,  arrow[i,0],  arrow[i,1], arrow[i,2], color=color)
+        #ax.quiver(zero[:,0], zero[:,1], zero[:,2],
+            #arrow[0,:]*0.3,
+            #arrow[1,:]*0.3,
+            #arrow[2,:]*0.3,
+            #color=['b','g','r'])
+        #ax.quiver(zero[:,0], zero[:,1], zero[:,2],
+        #    arrow[0,:]*0.1,
+        #    arrow[1,:]*0.1,
+        #    arrow[2,:]*0.1,
+        #    color=['b','g','r'])
 
     if path:
         plt.savefig(path, format='png', dpi=1000)
