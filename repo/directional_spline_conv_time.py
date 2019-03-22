@@ -28,17 +28,14 @@ class DirectionalSplineConvTIME(MessagePassing):
         self.tt3 = TicToc(name='SplineConv')
         self.tt4 = TicToc(name='After SC  ')
         self.counter = 0
-        self.temp = open('somefile', 'w')
 
     def forward(self, x, edge_index):
         self.counter += 1
-        self.temp.write(str(self.counter) + '\n')
         if self.counter % 4 == 0:
-            self.temp.write(str(self.tt1) + '\n')
-            self.temp.write(str(self.tt2) + '\n')
-            self.temp.write(str(self.tt3) + '\n')
-            self.temp.write(str(self.tt4) + '\n')
-        self.temp.flush()
+            print(str(self.tt1))
+            print(str(self.tt2))
+            print(str(self.tt3))
+            print(str(self.tt4))
 
         self.tt1.tic()
         self.tt2.tic()
