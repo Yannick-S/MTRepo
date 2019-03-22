@@ -55,7 +55,7 @@ train_loader = DataLoader(dataset, batch_size=experiment['batch_size'])
 ################################################################
 ### Setup Model ################################################
 import torch
-from directional_spline_conv import SampleNetDC
+from directional_spline_conv_id import SampleNetDC
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
