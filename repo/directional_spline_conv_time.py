@@ -29,7 +29,8 @@ class DirectionalSplineConvTIME(MessagePassing):
 
     def forward(self, x, edge_index):
         self.counter += 1
-        if self.counter % 400 == 0:
+        print(self.counter)
+        if self.counter % 4 == 0:
             print(self.tt1)
             print(self.tt2)
             print(self.tt3)
