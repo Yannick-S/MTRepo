@@ -1,4 +1,5 @@
 import torch
+from utility.tictoc import TicToc
 
 def diag(A, nr_iterations, device):
     A_ = A.clone()
@@ -51,9 +52,9 @@ def diag(A, nr_iterations, device):
         else:
             W = torch.bmm(V,W)
 
-    if torch.isnan(A).any():
-        diag_loud(A_, nr_iterations, device)
-        quit()
+    #if torch.isnan(A).any():
+    #    diag_loud(A_, nr_iterations, device)
+    #    quit()
     if torch.isnan(W).any():
         diag_loud(A_, nr_iterations, device)
         quit()
@@ -63,9 +64,12 @@ def diag(A, nr_iterations, device):
         (A[:,0,0].view(-1,1),A[:,1,1].view(-1,1),A[:,2,2].view(-1,1)),
         dim=1)
     diag = torch.abs(diag)
+
     sort = torch.argsort(diag, dim=1, descending=True)
-    for i in range(W.size(0)):
-        W[i] = W[i,sort[i]]
+    sort = sort.view(-1,1,3)
+    sort = sort.repeat(1,3,1)
+    
+    W = torch.gather(W, dim=2, index=sort)
 
     return A, W
 
@@ -142,6 +146,8 @@ def diag_loud(A, nr_iterations, device):
         dim=1)
     diag = torch.abs(diag)
     sort = torch.argsort(diag, dim=1, descending=True)
+
+
     for i in range(W.size(0)):
         W[i] = W[i,sort[i]]
 
@@ -149,9 +155,7 @@ def diag_loud(A, nr_iterations, device):
 
 if __name__ == "__main__":
     X = torch.rand((1000,10,3))
-    S, V = diag(X, nr_iterations=10,device='cpu')
-
-    A = torch.bmm(torch.transpose(X,1,2) , X)
     
-    A = torch.bmm(V, A)
-    A = torch.bmm(A, torch.transpose(V,1,2))
+    A = torch.bmm(torch.transpose(X,1,2) , X)
+
+    S, V = diag(A, nr_iterations=7,device='cpu')
