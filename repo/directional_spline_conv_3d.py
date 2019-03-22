@@ -80,20 +80,6 @@ class DirectionalSplineConv3D(MessagePassing):
 
         out = torch.mul(out_bn, out)
 
-        #######
-        arrow = out[0,:,:].t().detach()
-        plot_point_cloud(clusters[0,:,:], arrow=arrow.numpy())
-
-        plot_point_cloud(clusters[0,:,:])
-        plot_point_cloud(directional_clusters[0,:,:])
-
-        arrow_nondir = torch.zeros(self.filter_nr,3)
-        arrow_nondir[:,2] = out_bn[0,2,:].detach()
-        plot_point_cloud(directional_clusters[0,:,:] - 0.5, arrow=arrow_nondir.numpy())
-
-        plot_point_cloud(clusters[0,:,:], arrow=arrow.numpy())
-
-        ##########
         # rotate results back
         #out = 
 
