@@ -13,14 +13,14 @@ if load_from_file:
 
 experiment = {
     ### Data
-    "nr_points": 500,
+    "nr_points": 50,
     ### Net
     "k": 20,
     "l": 9,
-    "nr_filters": 15,
-    "filter_size": 10,
+    "nr_filters": 5,
+    "filter_size": 5,
     ### Learning
-    "batch_size": 26,
+    "batch_size": 5,
     "learning_rate": 0.0001
 }
 
@@ -55,7 +55,7 @@ train_loader = DataLoader(dataset, batch_size=experiment['batch_size'])
 ################################################################
 ### Setup Model ################################################
 import torch
-from directional_spline_conv_id import SampleNetDC
+from directional_spline_conv_time import SampleNetDC
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

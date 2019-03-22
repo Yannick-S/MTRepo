@@ -5,10 +5,11 @@ from torch.nn import BatchNorm1d
 
 from utility.diag import diag
 from utility.utility import plot_point_cloud
+from utility.tictoc import TicToc
 
-class DirectionalSplineConv(MessagePassing):
+class DirectionalSplineConvTIME(MessagePassing):
     def __init__(self, filter_nr, l, k, kernel_size):
-        super(DirectionalSplineConv, self).__init__()
+        super(DirectionalSplineConvTIME, self).__init__()
         self.k = k
         self.l = l if l <= k else k
 
@@ -20,29 +21,43 @@ class DirectionalSplineConv(MessagePassing):
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+        self.tt1 = TicToc(name='Batch     ')
+        self.tt2 = TicToc(name='To SplineC')
+        self.tt3 = TicToc(name='SplineConv')
+        self.tt4 = TicToc(name='After SC  ')
+        self.counter = 0
+
     def forward(self, x, edge_index):
+        self.counter += 1
+        if self.counter % 4000 == 0:
+            print(self.tt1)
+            print(self.tt2)
+            print(self.tt3)
+            print(self.tt4)
+
+        self.tt1.tic()
+        self.tt2.tic()
         # center the clusters, make view
         clusters = x[edge_index[1,:]] - x[edge_index[0,:]]
         clusters = clusters.view(-1,self.k,3)
 
         # get covariance matrices:
-        #cov_mat = torch.zeros((x.size(0), 3 , 3), device=self.device)
-        #for i in range(x.size(0)):
-        #    cov_cluster  = clusters[i,:self.l,:]
-        #    cov_mat[i,:,:] = torch.matmul(cov_cluster.t(), cov_cluster)
+        cov_mat = torch.zeros((x.size(0), 3 , 3), device=self.device)
+        for i in range(x.size(0)):
+            cov_cluster  = clusters[i,:self.l,:]
+            cov_mat[i,:,:] = torch.matmul(cov_cluster.t(), cov_cluster)
 
         # get the projections
-        #S, V = diag(cov_mat, nr_iterations=5, device=self.device)
-        
+        S, V = diag(cov_mat, nr_iterations=5, device=self.device)
 
         # apply projections to clusters
-        #directional_clusters = torch.bmm(clusters, torch.transpose(V, 1,2)) 
-        #signs = directional_clusters[:,:,2].sum(dim=1).sign()
-        #directional_clusters[:,:,2] = directional_clusters[:,:,2] * signs.view(-1,1)
-        max_abs = clusters.abs(
+        directional_clusters = torch.bmm(clusters, torch.transpose(V, 1,2)) 
+        signs = directional_clusters[:,:,2].sum(dim=1).sign()
+        directional_clusters[:,:,2] = directional_clusters[:,:,2] * signs.view(-1,1)
+        max_abs = directional_clusters.abs(
                     ).view(-1,self.k*3
                     ).max(dim=1)[0]
-        directional_clusters = clusters/max_abs.view(-1,1,1)
+        directional_clusters = directional_clusters/max_abs.view(-1,1,1)
         directional_clusters = directional_clusters*0.5 +0.5
 
         #plot_point_cloud(clusters[0,:,:])
@@ -65,7 +80,11 @@ class DirectionalSplineConv(MessagePassing):
         ones  = torch.ones((self.k*x.size(0)), device=self.device)
 
         # conv
+        self.tt2.toc()
+        self.tt3.tic()
         conv_out = self.conv(ones, cluster_edge, directional_clusters.view(-1,3))
+        self.tt3.toc()
+        self.tt4.tic()
 
         # extract important results
         linsp = torch.linspace(0, x.size(0) - 1, steps=x.size(0), device=self.device) * self.k
@@ -75,6 +94,8 @@ class DirectionalSplineConv(MessagePassing):
         # batch NR
         out_bn = self.bn(out_nondir)
 
+        self.tt1.toc()
+        self.tt4.toc()
         return out_bn
 
 
@@ -96,7 +117,7 @@ class SampleNetDC(torch.nn.Module):
         self.filter_nr= nr_filters
         self.kernel_size = filter_size
 
-        self.dsc = DirectionalSplineConv(filter_nr=self.filter_nr,
+        self.dsc = DirectionalSplineConvTIME(filter_nr=self.filter_nr,
                                             kernel_size=self.kernel_size,
                                             l=self.l,
                                             k=self.k)
