@@ -31,7 +31,6 @@ class DirectionalSplineConvTIME(MessagePassing):
 
     def forward(self, x, edge_index):
         self.counter += 1
-        print(self.device)
         if self.counter % 40 == 0:
             print(str(self.tt1))
             print(str(self.tt2))
@@ -44,20 +43,17 @@ class DirectionalSplineConvTIME(MessagePassing):
 
         # get covariance matrices:
         cov_mat = torch.zeros((x.size(0), 3 , 3), device=self.device)
-        for i in range(x.size(0)):
-            self.tt1.tic()
-            cov_cluster  = clusters[i,:self.l,:]
-            self.tt1.toc()
-            self.tt2.tic()
-            cov_mat[i,:,:] = torch.matmul(cov_cluster.t(), cov_cluster)
-            self.tt2.toc()
+        clusters_t = torch.transpose(clusters,dim0=1,dim1=2)
+        self.tt1.tic()
+        cov_mat2 = torch.bmm( clusters_t[:,:,:self.l], clusters[:,:self.l,:])
+        self.tt1.toc()
+
         # get the projections
-        self.tt3.tic()
+        self.tt4.tic()
         S, V = diag(cov_mat, nr_iterations=5, device=self.device)
-        self.tt3.toc()
+        self.tt4.toc()
 
         # apply projections to clusters
-        self.tt4.tic()
         directional_clusters = torch.bmm(clusters, torch.transpose(V, 1,2)) 
         signs = directional_clusters[:,:,2].sum(dim=1).sign()
         directional_clusters[:,:,2] = directional_clusters[:,:,2] * signs.view(-1,1)
@@ -66,7 +62,6 @@ class DirectionalSplineConvTIME(MessagePassing):
                     ).max(dim=1)[0]
         directional_clusters = directional_clusters/max_abs.view(-1,1,1)
         directional_clusters = directional_clusters*0.5 +0.5
-        self.tt4.toc()
 
         #plot_point_cloud(clusters[0,:,:])
         #plot_point_cloud(directional_clusters[0,:,:])
