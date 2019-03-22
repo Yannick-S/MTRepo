@@ -1,6 +1,8 @@
 checkpoint/*
 data/*
 examples/*
+img/*
+img_conv/*
 
 **.pyc
 *.pyc
