@@ -14,13 +14,13 @@ if load_from_file:
 experiment = {
     ### Data
     "nr_points": 50,
+    "batch_size": 5,
     ### Net
     "k": 20,
     "l": 9,
     "nr_filters": 5,
     "filter_size": 5,
     ### Learning
-    "batch_size": 5,
     "learning_rate": 0.0001
 }
 
@@ -33,6 +33,8 @@ start_epoch = 0
 
 ###############################################################
 #### Load Data ################################################
+
+
 from torch_geometric.datasets.geometry import GeometricShapes
 from torch_geometric.transforms import SamplePoints, Compose,  NormalizeScale, RandomRotate, RandomTranslate
 from torch_geometric.data import DataLoader
