@@ -1,7 +1,7 @@
 load_from_file = False
 start_epoch = 0
 #### prepare model
-from test_model import Net
+from model_1layer import Net
 import torch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
