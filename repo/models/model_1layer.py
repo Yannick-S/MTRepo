@@ -19,7 +19,7 @@ class Net(torch.nn.Module):
         self.data_name = "ModelNet10"
         self.batch_size = 20
         self.nr_points = 1000
-        self.nr_classes = 40 
+        self.nr_classes = 10
 
         #train_info
         self.max_epochs = 100
