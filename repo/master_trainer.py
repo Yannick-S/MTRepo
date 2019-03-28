@@ -1,11 +1,22 @@
+from utility.checknotebook import in_ipynb
+if in_ipynb():
+    import os
+    os.chdir("..")
+    ! git pull
+    os.chdir("repo")
+
 load_from_file = False
 start_epoch = 0
 #### prepare model
-from models.model_1layer import Net
+import models.model_1layer as mod
+if in_ipynb():
+    import importlib
+    importlib.reload(mod)
+
 import torch
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-model = Net().to(device)
+model = mod.Net().to(device)
 model_info = model.get_info()
 optimizer = model.get_optimizer()
 loss = torch.nn.NLLLoss()
