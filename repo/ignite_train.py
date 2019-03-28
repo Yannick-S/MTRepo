@@ -51,12 +51,12 @@ def run(model,
             log_img, 
             model_info["training"]["save_every"], training_history, path, start_epoch)
 
-    pbar = tqdm(total=model_info["training"]["max_epochs"])
-    @trainer.on(Events.EPOCH_COMPLETED)
-    def show_bar(engine):
-        pbar.update(1)
+    #pbar = tqdm(total=model_info["training"]["max_epochs"])
+    #@trainer.on(Events.EPOCH_COMPLETED)
+    #def show_bar(engine):
+    #    pbar.update(1)
     trainer.run(train_loader, max_epochs=model_info["training"]["max_epochs"])
-    pbar.close()
+    #pbar.close()
 
 
 
