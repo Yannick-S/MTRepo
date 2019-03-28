@@ -16,7 +16,7 @@ class Net(torch.nn.Module):
         self.optimizer_name = 'Adam'
 
         #data
-        self.data_name = "Geometry"
+        self.data_name = "ModelNet10"
         self.batch_size = 2
         self.nr_points = 100
         self.nr_classes = 40 
