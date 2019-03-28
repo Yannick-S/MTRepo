@@ -2,6 +2,11 @@ def data_from_data_info(data_info):
     if data_info["name"] == 'Geometry':
         return GeometricShapesLoader(data_info["nr_points"],
                                      data_info["batch_size"]).get_data()
+    elif data_info["name"] == 'ModelNet10':
+        return ModelNet10Loader(data_info["nr_points"],
+                                     data_info["batch_size"]).get_data()
+    else:
+        raise NotImplementedError
 
 class BaseDataLoader():
     def __init__(self):

@@ -3,17 +3,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import knn_graph
 import torch.nn.functional as F
-from directional_spline_conv import DirectionalSplineConv
+from .layers.directional_spline_conv import DirectionalSplineConv
+
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
 
+        #name
+        self.name = "1layer"
         #optimizer
         self.lr = 0.001
         self.optimizer_name = 'Adam'
 
         #data
-        self.data_name = "Geometry"
+        self.data_name = "ModelNet10"
         self.batch_size = 2
         self.nr_points = 100
         self.nr_classes = 40 
