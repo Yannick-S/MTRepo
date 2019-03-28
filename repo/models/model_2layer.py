@@ -23,11 +23,11 @@ class Net(torch.nn.Module):
         #data
         self.data_name = "Geometry"
         self.batch_size = 20
-        self.nr_points = 1000
+        self.nr_points = 500
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 100
+        self.max_epochs = 1000
         self.save_every = 10
 
         #model
@@ -35,7 +35,7 @@ class Net(torch.nn.Module):
         self.l = 7
         
         self.filter_nr= 10
-        self.kernel_size = 5
+        self.kernel_size = 7
         self.dsc3d = DirectionalSplineConv3D(filter_nr=self.filter_nr,
                                             kernel_size=self.kernel_size,
                                             l=self.l,
