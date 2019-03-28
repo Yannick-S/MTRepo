@@ -8,9 +8,9 @@ from torch.nn import Sequential , Linear , ReLU
 from utility.diag import diag
 from utility.utility import plot_point_cloud
 
-class DirectionalDense(MessagePassing):
+class DirectionalDense3D(MessagePassing):
     def __init__(self, l, k, in_size, mlp, out_size, with_pos=True):
-        super(DirectionalDense, self).__init__()
+        super(DirectionalDense3D, self).__init__()
         self.k = k
         self.l = l if l <= k else k
 
@@ -61,8 +61,10 @@ class DirectionalDense(MessagePassing):
         out = out.view(-1, self.k, self.out_size)
         out = out.sum(dim=1)
 
-        # outer NN
-        # blank now
+        # rotate results back
+        out = out.view(-1,self.out_size,1).repeat(1,1,3)
+        out_V = V[:,2].view(-1,1,3).repeat(1,self.out_size,1)
+        out = torch.mul(out, out_V)
 
         return pos, edge_index, out
 

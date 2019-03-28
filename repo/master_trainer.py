@@ -2,13 +2,13 @@ from utility.checknotebook import in_ipynb
 if in_ipynb():
     import os
     os.chdir("..")
-    ! git pull
+    #! git pull
     os.chdir("repo")
 
 load_from_file = False
 start_epoch = 0
 #### prepare model
-import models.model_1layer as mod
+import models.model_2layer as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)

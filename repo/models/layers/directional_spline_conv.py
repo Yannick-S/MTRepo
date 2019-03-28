@@ -20,9 +20,9 @@ class DirectionalSplineConv(MessagePassing):
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    def forward(self, x, edge_index):
+    def forward(self, pos, edge_index):
         # center the clusters, make view
-        clusters = x[edge_index[1,:]] - x[edge_index[0,:]]
+        clusters = pos[edge_index[1,:]] - pos[edge_index[0,:]]
         clusters = clusters.view(-1,self.k,3)
 
         # get covariance matrices:
@@ -47,32 +47,32 @@ class DirectionalSplineConv(MessagePassing):
         
         #prepare output
             #out_dir = torch.zeros(x.size(0), self.filter_nr, 3).to(self.device)
-        out_nondir = torch.zeros((x.size(0),self.filter_nr),device=self.device)
+        out_nondir = torch.zeros((pos.size(0),self.filter_nr),device=self.device)
 
         # prepare edges
         ones  = torch.ones((self.k),device=self.device).view(1, self.k)
-        linsp = torch.linspace(0,x.size(0) - 1, steps=x.size(0), device=self.device).view(x.size(0),1)
+        linsp = torch.linspace(0,pos.size(0) - 1, steps=pos.size(0), device=self.device).view(pos.size(0),1)
         linsp = linsp * self.k
 
-        cluster_edge      = torch.zeros((2, x.size(0)*self.k), device=self.device, dtype=torch.long)
+        cluster_edge      = torch.zeros((2, pos.size(0)*self.k), device=self.device, dtype=torch.long)
         cluster_edge[0,:] = torch.matmul(linsp, ones).view(-1)
-        cluster_edge[1,:] = torch.linspace(0, x.size(0)*self.k-1, steps=x.size(0)*self.k, device=self.device)
+        cluster_edge[1,:] = torch.linspace(0, pos.size(0)*self.k-1, steps=pos.size(0)*self.k, device=self.device)
 
         # prepare pseudo 
-        ones  = torch.ones((self.k*x.size(0)), device=self.device)
+        ones  = torch.ones((self.k*pos.size(0)), device=self.device)
 
         # conv
         conv_out = self.conv(ones, cluster_edge, directional_clusters.view(-1,3))
 
         # extract important results
-        linsp = torch.linspace(0, x.size(0) - 1, steps=x.size(0), device=self.device) * self.k
+        linsp = torch.linspace(0, pos.size(0) - 1, steps=pos.size(0), device=self.device) * self.k
         linsp = linsp.long()
         out_nondir = conv_out[linsp,:]
 
         # batch NR
         out_bn = self.bn(out_nondir)
 
-        return out_bn
+        return pos, edge_index, out_bn
 
 
 
