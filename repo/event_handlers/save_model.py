@@ -4,6 +4,7 @@ def handler_save_model(engine, save_every, model, optimizer, training_history, p
     true_epoch = engine.state.epoch  + start_epoch
     if not engine.state.epoch  % save_every == 0:
         return
+    print("Saving: ", path + 'epoch_{:05d}.pth'.format(true_epoch))
     torch.save({
         'epoch': true_epoch,
         'model_state_dict': model.state_dict(),
