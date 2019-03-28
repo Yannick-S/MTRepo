@@ -17,8 +17,8 @@ class Net(torch.nn.Module):
 
         #data
         self.data_name = "ModelNet10"
-        self.batch_size = 2
-        self.nr_points = 100
+        self.batch_size = 20
+        self.nr_points = 1000
         self.nr_classes = 40 
 
         #train_info
@@ -29,7 +29,7 @@ class Net(torch.nn.Module):
         self.k = 15
         self.l = 7
         
-        self.filter_nr= 5
+        self.filter_nr= 10
         self.kernel_size = 5
 
         self.dsc = DirectionalSplineConv(filter_nr=self.filter_nr,
