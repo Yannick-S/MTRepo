@@ -1,7 +1,7 @@
 import os
 import torch
 
-def load_model(model_info, model):
+def load_model(model_info, model, optimizer):
     name = model_info["name"]
 
     # find latest model
@@ -21,7 +21,9 @@ def load_model(model_info, model):
     training_history = checkpoint['training_history']
     start_epoch = checkpoint['epoch']
 
-    return model, optimizer, training_history, start_epoch, last_dir 
+    # 
+    path = 'checkpoint' + '/' + name + '/' + last_dir + '/'
+    return model, optimizer, training_history, start_epoch, path 
 
 def else_load(model_info):
     training_history = {'nll': [], 'acc': []}

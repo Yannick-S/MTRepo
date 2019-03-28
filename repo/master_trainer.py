@@ -1,4 +1,4 @@
-load_from_file = False
+load_from_file = True 
 start_epoch = 0
 #### prepare model
 from model_1layer import Net
@@ -13,7 +13,7 @@ loss = torch.nn.NLLLoss()
 #### load model
 from model_loader import load_model, else_load
 if load_from_file:
-    model, optimizer, training_history, start_epoch, path = load_model(model_info,model)
+    model, optimizer, training_history, start_epoch, path = load_model(model_info,model, optimizer)
 else:
     training_history, path = else_load(model_info)
 

@@ -14,20 +14,20 @@ class Net(torch.nn.Module):
 
         #data
         self.data_name = "Geometry"
-        self.batch_size = 5
-        self.nr_points = 1000
+        self.batch_size = 2
+        self.nr_points = 100
         self.nr_classes = 40 
 
         #train_info
-        self.max_epochs = 1000
-        self.save_every = 100
+        self.max_epochs = 100
+        self.save_every = 10
 
         #model
-        self.k = 20
+        self.k = 15
         self.l = 7
         
-        self.filter_nr= 7
-        self.kernel_size = 7
+        self.filter_nr= 5
+        self.kernel_size = 5
 
         self.dsc = DirectionalSplineConv(filter_nr=self.filter_nr,
                                             kernel_size=self.kernel_size,
@@ -61,9 +61,9 @@ class Net(torch.nn.Module):
     
     def get_info(self):
         model_info = {
-            "name": "test_model",
+            "name": self.name,
             "opt": {
-                "name": "Adam",
+                "name": self.optimizer_name,
                 "lr": self.lr
             },
             "data":{
@@ -83,4 +83,6 @@ class Net(torch.nn.Module):
         if self.optimizer_name == 'Adam':
             return torch.optim.Adam(self.parameters(),
                                           lr=self.lr)
+        else:
+            raise NotImplementedError
 
