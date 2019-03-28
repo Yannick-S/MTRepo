@@ -61,9 +61,6 @@ class DirectionalDense(MessagePassing):
         out = out.view(-1, self.k, self.out_size)
         out = out.sum(dim=1)
 
-        # outer NN
-        # blank now
-
         return pos, edge_index, out
 
 

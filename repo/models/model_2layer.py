@@ -21,10 +21,10 @@ class Net(torch.nn.Module):
         self.optimizer_name = 'Adam'
 
         #data
-        self.data_name = "ModelNet10"
+        self.data_name = "Geometry"
         self.batch_size = 20
         self.nr_points = 1000
-        self.nr_classes = 10
+        self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
         self.max_epochs = 100
@@ -59,8 +59,23 @@ class Net(torch.nn.Module):
 
 
         #
+        self.in_size_2 = self.out_size*3
+        self.out_size_2 = 32
+        layers2 = []
+        layers2.append(Linear(self.in_size_2, 64))
+        layers2.append(ReLU())
+        layers2.append(Linear(64, self.out_size_2))
+        layers2.append(ReLU())
+        dense3dnet2 = Sequential(*layers2)
+        self.dd2 = DirectionalDense(l = self.l,
+                                   k = self.k,
+                                   in_size = self.in_size_2,
+                                   mlp = dense3dnet2,
+                                   out_size = self.out_size_2,
+                                   with_pos=False)
 
-        self.nn1 = torch.nn.Linear(self.filter_nr, 256)
+
+        self.nn1 = torch.nn.Linear(self.out_size_2, 256)
         self.nn2 = torch.nn.Linear(256, self.nr_classes)
 
         self.sm = torch.nn.LogSoftmax(dim=1)
@@ -77,19 +92,21 @@ class Net(torch.nn.Module):
         _,_,features_3d = self.dsc3d(pos, edge_index) 
         features_3d = torch.sigmoid(features_3d)
         _,_,features_dd = self.dd(pos, edge_index, features_3d)
+        features_dd = torch.sigmoid(features_dd)
 
         # pooling 80%
-        index = fps(pos, batch=batch, ratio=0.8)
+        index = fps(pos, batch=batch, ratio=0.2)
         pos = pos[index]
         features = features_dd[index]
         batch = batch[index]
         edge_index = knn_graph(pos, self.k, batch, loop=False) #change pos to features for test later!
 
-        quit()
         # extract features in 3d again
+        _,_,features_dd2 = self.dd2(pos, edge_index, features_dd)
+        features_dd2 = torch.sigmoid(features_dd2)
 
-        ys = features_dd.view(-1, self.nr_points , 256)
-        ys = ys.mean(dim=1).view(-1, self.filter_nr)
+        ys = features_dd2.view(self.batch_size, -1 , self.out_size_2)
+        ys = ys.mean(dim=1).view(-1, self.out_size_2)
         y1 = self.nn1(ys)
         y1 = F.elu(y1)
         y2 = self.nn2(y1)
