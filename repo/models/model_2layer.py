@@ -15,7 +15,7 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         #name
-        self.name = "1layer"
+        self.name = "2layer"
         #optimizer
         self.lr = 0.001
         self.optimizer_name = 'Adam'
@@ -28,7 +28,7 @@ class Net(torch.nn.Module):
 
         #train_info
         self.max_epochs = 1000
-        self.save_every = 10
+        self.save_every = 100
 
         #model
         self.k = 15
