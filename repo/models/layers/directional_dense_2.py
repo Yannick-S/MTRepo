@@ -43,16 +43,24 @@ class DirectionalDense(MessagePassing):
            directional_clusters[:,:,2] = directional_clusters[:,:,2] * signs.view(-1,1)
 
         # apply projection to features
-        clusters_feature = features[edge_index[1,:]]
-        clusters_feature = clusters_feature.view(nr_points, -1 ,3)
-        directional_features = torch.bmm(clusters_feature, V_t)
-        directional_features = directional_features.view(nr_points,self.k,-1)
+        clusters_feature_neighbor = features[edge_index[1,:]]
+        clusters_feature_neighbor = clusters_feature_neighbor.view(nr_points, -1 ,3)
+        directional_features_neighbor = torch.bmm(clusters_feature_neighbor, V_t)
+        directional_features_neighbor = directional_features_neighbor.view(nr_points,self.k,-1)
+
+        clusters_feature_central = features[edge_index[1,:]]
+        clusters_feature_central = clusters_feature_central.view(nr_points, -1 ,3)
+        directional_features_central = torch.bmm(clusters_feature_central, V_t)
+        directional_features_central = directional_features_central.view(nr_points,self.k,-1)
 
         # concatenate the features and positions
-        if self.with_pos:
-            concat = torch.cat((directional_clusters, directional_features), dim=2).view(-1,self.in_size)
-        else:
-            concat = directional_features.view(-1, self.in_size)
+        if False:
+            if self.with_pos:
+                concat = torch.cat((directional_clusters, directional_features_neighbor), dim=2).view(-1,self.in_size)
+            else:
+                concat = directional_features.view(-1, self.in_size)
+        
+        concat = torch.cat((directional_features_central, directional_features_neighbor - directional_features_central), dim=2).view(-1,self.in_size)
 
         # do the inner NN
         out = self.net(concat)
