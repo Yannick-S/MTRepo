@@ -23,7 +23,7 @@ class Net(torch.nn.Module):
         #data
         self.data_name = "Geometry"
         self.batch_size = 20
-        self.nr_points = 500
+        self.nr_points = 1000
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
@@ -31,10 +31,10 @@ class Net(torch.nn.Module):
         self.save_every = 100
 
         #model
-        self.k = 15
+        self.k = 20
         self.l = 7
         
-        self.filter_nr= 10
+        self.filter_nr= 32
         self.kernel_size = 7
         self.dsc3d = DirectionalSplineConv3D(filter_nr=self.filter_nr,
                                             kernel_size=self.kernel_size,
@@ -43,11 +43,11 @@ class Net(torch.nn.Module):
         
         #
         self.in_size = self.filter_nr*3 + 3
-        self.out_size = 20
+        self.out_size = 64
         layers = []
-        layers.append(Linear(self.in_size, 20))
+        layers.append(Linear(self.in_size, 128))
         layers.append(ReLU())
-        layers.append(Linear(20, self.out_size))
+        layers.append(Linear(128, self.out_size))
         layers.append(ReLU())
         dense3dnet = Sequential(*layers)
         self.dd = DirectionalDense3D(l = self.l,
@@ -60,11 +60,11 @@ class Net(torch.nn.Module):
 
         #
         self.in_size_2 = self.out_size*3
-        self.out_size_2 = 32
+        self.out_size_2 = 256
         layers2 = []
-        layers2.append(Linear(self.in_size_2, 64))
+        layers2.append(Linear(self.in_size_2, 128))
         layers2.append(ReLU())
-        layers2.append(Linear(64, self.out_size_2))
+        layers2.append(Linear(128, self.out_size_2))
         layers2.append(ReLU())
         dense3dnet2 = Sequential(*layers2)
         self.dd2 = DirectionalDense(l = self.l,
@@ -75,8 +75,8 @@ class Net(torch.nn.Module):
                                    with_pos=False)
 
 
-        self.nn1 = torch.nn.Linear(self.out_size_2, 256)
-        self.nn2 = torch.nn.Linear(256, self.nr_classes)
+        self.nn1 = torch.nn.Linear(self.out_size_2, 1024)
+        self.nn2 = torch.nn.Linear(1024, self.nr_classes)
 
         self.sm = torch.nn.LogSoftmax(dim=1)
 
