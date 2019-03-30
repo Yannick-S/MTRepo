@@ -81,7 +81,7 @@ class Net(torch.nn.Module):
         y1 = F.elu(y1)
         y2 = self.nn2(y1)
         y2 = self.sm(y2) 
-            
+        
         return y2
 
     

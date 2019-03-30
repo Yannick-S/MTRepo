@@ -5,7 +5,7 @@ from torch_geometric.nn import knn_graph, fps
 
 import torch.nn.functional as F
 from .layers.directional_spline_conv_3d import DirectionalSplineConv3D
-from .layers.directional_dense_1 import DirectionalDense
+from .layers.directional_dense_4 import DirectionalDense
 
 from torch.nn import Sequential , Linear , ReLU
 class Net(torch.nn.Module):
