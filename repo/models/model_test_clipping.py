@@ -22,8 +22,8 @@ class Net(torch.nn.Module):
 
         #data
         self.data_name = "Geometry"
-        self.batch_size = 20
-        self.nr_points = 1025
+        self.batch_size = 2
+        self.nr_points = 30
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
@@ -115,9 +115,9 @@ class Net(torch.nn.Module):
             opt = torch.optim.SGD(self.parameters(),
                                           lr=self.lr)
             sch = CyclicLR(opt, 
-                           base_lr=1e-4,
-                           max_lr=6e-3,
-                           step_size=50,
+                           base_lr=1e-5,
+                           max_lr=5e-4,
+                           step_size=20,
                            mode='triangular'
                            )
             return opt, sch
