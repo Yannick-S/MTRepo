@@ -32,7 +32,7 @@ else:
 #### load data
 import data_loader
 if in_ipynb(): importlib.reload(data_loader)
-train_loader, val_loader = data_from_data_info(model_info["data"])
+train_loader, val_loader = data_loader.data_from_data_info(model_info["data"])
 
 #### train
 import ignite_train
