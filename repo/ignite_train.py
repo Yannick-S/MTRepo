@@ -9,6 +9,8 @@ import datetime
 import os
 from plot_results.setup_file import save_file, load_file
 
+import torch
+
 def run(model, 
     optimizer,
     scheduler,
@@ -32,6 +34,8 @@ def run(model,
         loss = loss_fn(y_pred, y)
         loss.backward()
         ### do clipping here
+        torch.nn.utils.clip_grad_norm(model.parameters(),1)
+
         optimizer.step()
         return loss.item()    
 
