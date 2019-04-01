@@ -110,12 +110,12 @@ class Net(torch.nn.Module):
     def get_optimizer(self):
         if self.optimizer_name == 'Adam':
             return torch.optim.Adam(self.parameters(),
-                                          lr=self.lr), _
+                                          lr=self.lr)
         if self.optimizer_name == 'SGD':
             opt = torch.optim.SGD(self.parameters(),
                                           lr=self.lr)
             sch = CyclicLR(opt, 
-                           base_lr=1e-3,
+                           base_lr=1e-4,
                            max_lr=6e-3,
                            step_size=50,
                            mode='triangular'
