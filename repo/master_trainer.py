@@ -18,26 +18,27 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = mod.Net().to(device)
 model_info = model.get_info()
-optimizer, scheduler = model.get_optimizer()
+optimizer = model.get_optimizer()
 loss = torch.nn.NLLLoss()
 
 #### load model
-from model_loader import load_model, else_load
+import model_loader
+if in_ipynb(): importlib.reload(model_loader)
 if load_from_file:
-    model, optimizer, training_history, param_history, start_epoch, path = load_model(model_info,model, optimizer)
+    model, optimizer, training_history, param_history, start_epoch, path = model_loader.load_model(model_info,model, optimizer)
 else:
-    training_history, param_history, path = else_load(model_info, model)
+    training_history, param_history, path = model_loader.else_load(model_info, model)
 
 #### load data
-from data_loader import data_from_data_info
+import data_loader
+if in_ipynb(): importlib.reload(data_loader)
 train_loader, val_loader = data_from_data_info(model_info["data"])
 
 #### train
-from ignite_train import run
-
-run(model, 
+import ignite_train
+if in_ipynb(): importlib.reload(ignite_train)
+ignite_train.run(model, 
     optimizer,
-    scheduler,
     loss,
     device,
     train_loader,
