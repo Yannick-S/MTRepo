@@ -37,6 +37,7 @@ from ignite_train import run
 
 run(model, 
     optimizer,
+    scheduler,
     loss,
     device,
     train_loader,

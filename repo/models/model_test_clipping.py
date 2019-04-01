@@ -22,8 +22,8 @@ class Net(torch.nn.Module):
 
         #data
         self.data_name = "Geometry"
-        self.batch_size = 1
-        self.nr_points = 300
+        self.batch_size = 10
+        self.nr_points = 30
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info

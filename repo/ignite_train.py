@@ -11,6 +11,7 @@ from plot_results.setup_file import save_file, load_file
 
 def run(model, 
     optimizer,
+    scheduler,
     loss_fn, 
     device, 
     train_loader, 
@@ -42,7 +43,11 @@ def run(model,
                                         device=device,
                                         prepare_batch=prep_batch)
 
-
+    from event_handlers.scheduler import do_scheduler
+    trainer.add_event_handler(
+        Events.EPOCH_STARTED,
+        do_scheduler,
+        optimizer, scheduler)
     
     from event_handlers.log_gradient import log_gradient
     trainer.add_event_handler(
