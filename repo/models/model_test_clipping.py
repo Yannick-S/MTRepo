@@ -18,7 +18,7 @@ class Net(torch.nn.Module):
         self.name = "test_clip"
         #optimizer
         self.lr = 0.001
-        self.optimizer_name = 'SGD'
+        self.optimizer_name = 'Adam'
 
         #data
         self.data_name = "Geometry"
@@ -118,7 +118,7 @@ class Net(torch.nn.Module):
                            mode='triangular'
                            )
             return opt, sch
-                                          lr=self.lr)
+                                         
         if self.optimizer_name == 'SGD':
             opt = torch.optim.SGD(self.parameters(),
                                           lr=self.lr)

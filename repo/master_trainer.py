@@ -1,6 +1,6 @@
-import os
-os.chdir("/content")
-os.chdir("MTRepo/repo/")
+#import os
+#os.chdir("/content")
+#os.chdir("MTRepo/repo/")
 
 from utility.checknotebook import in_ipynb
 if in_ipynb():
