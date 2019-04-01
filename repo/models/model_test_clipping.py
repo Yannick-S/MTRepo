@@ -110,7 +110,7 @@ class Net(torch.nn.Module):
     def get_optimizer(self):
         if self.optimizer_name == 'Adam':
             return torch.optim.Adam(self.parameters(),
-                                          lr=self.lr)
+                                          lr=self.lr), _
         if self.optimizer_name == 'SGD':
             opt = torch.optim.SGD(self.parameters(),
                                           lr=self.lr)

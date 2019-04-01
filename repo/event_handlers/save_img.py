@@ -9,6 +9,9 @@ def log_img(engine, save_every, training_history, param_history, path, start_epo
     plot_grad(param_history, show=False)
     save_plot(path + 'epoch_{:05d}_grad.eps'.format(true_epoch))
 
+    plot_grad2(param_history, show=False)
+    save_plot(path + 'epoch_{:05d}_grad2.eps'.format(true_epoch))
+
     plot_hist_acc(training_history['acc'])
     save_plot(path + 'epoch_{:05d}_acc.eps'.format(true_epoch))
 

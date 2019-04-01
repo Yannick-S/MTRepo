@@ -18,7 +18,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = mod.Net().to(device)
 model_info = model.get_info()
-optimizer = model.get_optimizer()
+optimizer, scheduler = model.get_optimizer()
 loss = torch.nn.NLLLoss()
 
 #### load model
@@ -39,6 +39,7 @@ import ignite_train
 if in_ipynb(): importlib.reload(ignite_train)
 ignite_train.run(model, 
     optimizer,
+    scheduler,
     loss,
     device,
     train_loader,
