@@ -9,8 +9,8 @@ def plot_grad(param_history, show=False):
         plt.plot(range(n), tensor/tmax,  color='C'+str(i%10))
 
     plt.xlabel('Epoch')
-    plt.ylabel('NLL')
-    plt.title('Negative Log Likelyhood')
+    plt.ylabel('Normailzed absolute max gradient')
+    plt.title('Gradients')
     if show:
         plt.show()
 

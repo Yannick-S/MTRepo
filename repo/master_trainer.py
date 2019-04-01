@@ -5,7 +5,7 @@ if in_ipynb():
     #! git pull
     os.chdir("repo")
 
-load_from_file = True
+load_from_file = False
 start_epoch = 0
 #### prepare model
 import models.model_test_clipping as mod
@@ -18,7 +18,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = mod.Net().to(device)
 model_info = model.get_info()
-optimizer = model.get_optimizer()
+optimizer, scheduler = model.get_optimizer()
 loss = torch.nn.NLLLoss()
 
 #### load model
