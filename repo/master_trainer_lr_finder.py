@@ -1,6 +1,6 @@
-import os
-os.chdir("/content")
-os.chdir("MTRepo/repo/")
+#import os
+#os.chdir("/content")
+#os.chdir("MTRepo/repo/")
 
 from utility.checknotebook import in_ipynb
 if in_ipynb():
@@ -40,6 +40,10 @@ train_loader, val_loader = data_loader.data_from_data_info(model_info["data"])
 #### train
 import ignite_train
 if in_ipynb(): importlib.reload(ignite_train)
+
+print(model_info)
+    
+quit()
 
 ignite_train.run(model, 
     optimizer,
