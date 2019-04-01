@@ -34,7 +34,8 @@ def run(model,
         loss = loss_fn(y_pred, y)
         loss.backward()
         ### do clipping here
-        torch.nn.utils.clip_grad_norm(model.parameters(),1)
+        for param in model.parameters():
+            param.grad.data.clamp_(-1,1)
 
         optimizer.step()
         return loss.item()    
