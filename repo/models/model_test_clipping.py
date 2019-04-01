@@ -115,8 +115,8 @@ class Net(torch.nn.Module):
             opt = torch.optim.SGD(self.parameters(),
                                           lr=self.lr)
             sch = CyclicLR(opt, 
-                           base_lr=1e-5,
-                           max_lr=5e-4,
+                           base_lr=1e-3,
+                           max_lr=5e-1,
                            step_size=20,
                            mode='triangular'
                            )
