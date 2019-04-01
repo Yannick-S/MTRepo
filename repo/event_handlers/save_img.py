@@ -1,4 +1,4 @@
-from plot_results.plot_hist import plot_grad, plot_hist_acc, plot_hist_loss, save_plot
+from plot_results.plot_hist import plot_grad,plot_grad2, plot_hist_acc, plot_hist_loss, save_plot
 
 def log_img(engine, save_every, training_history, param_history, path, start_epoch):
     if not engine.state.epoch  % save_every == 0:
