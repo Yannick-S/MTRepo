@@ -1,4 +1,18 @@
 import matplotlib.pyplot as plt
+import torch 
+
+def plot_grad(param_history, show=False):
+    for i in param_history:
+        tensor = torch.tensor(param_history[i]).numpy()
+        n = tensor.shape[0]
+        tmax = tensor.max()
+        plt.plot(range(n), tensor/tmax,  color='C'+str(i%10))
+
+    plt.xlabel('Epoch')
+    plt.ylabel('NLL')
+    plt.title('Negative Log Likelyhood')
+    if show:
+        plt.show()
 
 def plot_hist_loss(training_history, color='dodgerblue', show=False):
     n = len(training_history)

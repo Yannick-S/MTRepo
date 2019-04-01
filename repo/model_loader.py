@@ -19,13 +19,14 @@ def load_model(model_info, model, optimizer):
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     training_history = checkpoint['training_history']
+    param_history = checkpoint['param_history']
     start_epoch = checkpoint['epoch']
 
     # 
     path = 'checkpoint' + '/' + name + '/' + last_dir + '/'
-    return model, optimizer, training_history, start_epoch, path 
+    return model, optimizer, training_history, param_history, start_epoch, path 
 
-def else_load(model_info):
+def else_load(model_info, model):
     training_history = {'nll': [], 'acc': []}
     import datetime, os
     now = datetime.datetime.now()
@@ -36,4 +37,8 @@ def else_load(model_info):
     if not os.path.isdir('checkpoint/' + model_info["name"]): os.mkdir('checkpoint/' + model_info["name"])
     os.mkdir(path)
 
-    return training_history, path
+    param_history = {}
+    for i, param in enumerate(model.parameters()):
+        param_history[i] = []
+    
+    return training_history, param_history, path

@@ -5,10 +5,10 @@ if in_ipynb():
     #! git pull
     os.chdir("repo")
 
-load_from_file = False
+load_from_file = True
 start_epoch = 0
 #### prepare model
-import models.model_test_1 as mod
+import models.model_test_clipping as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
@@ -24,9 +24,9 @@ loss = torch.nn.NLLLoss()
 #### load model
 from model_loader import load_model, else_load
 if load_from_file:
-    model, optimizer, training_history, start_epoch, path = load_model(model_info,model, optimizer)
+    model, optimizer, training_history, param_history, start_epoch, path = load_model(model_info,model, optimizer)
 else:
-    training_history, path = else_load(model_info)
+    training_history, param_history, path = else_load(model_info, model)
 
 #### load data
 from data_loader import data_from_data_info
@@ -35,4 +35,13 @@ train_loader, val_loader = data_from_data_info(model_info["data"])
 #### train
 from ignite_train import run
 
-run(model, optimizer, loss, device, train_loader, training_history, model_info, start_epoch, path)
+run(model, 
+    optimizer,
+    loss,
+    device,
+    train_loader,
+    training_history,
+    param_history,
+    model_info,
+    start_epoch,
+    path)
