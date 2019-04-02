@@ -17,7 +17,7 @@ class Net(torch.nn.Module):
         #name
         self.name = "test_clip"
         #optimizer
-        self.lr = 0.001
+        self.lr = 0.0025
         self.optimizer_name = 'Adam'
 
         #data
@@ -93,8 +93,8 @@ class Net(torch.nn.Module):
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = CyclicLR(opt, 
-                           base_lr=1e-4,
-                           max_lr=1e-4,
+                           base_lr=0.002,
+                           max_lr=0.0026,
                            step_size=200,
                            mode='triangular'
                            )
