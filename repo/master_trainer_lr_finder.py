@@ -68,7 +68,7 @@ all_lrs = []
 
 import utility.lr_getter
 
-lr_g = utility.lr_getter.lr_exp(start=0.1, decay=0.5)
+lr_g = utility.lr_getter.lr_exp(start=0.001, decay=0.5)
 
 with tqdm(total=5) as pbar:
     for i in range(5):
