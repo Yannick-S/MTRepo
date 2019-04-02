@@ -41,12 +41,27 @@ import data_loader
 if in_ipynb(): importlib.reload(data_loader)
 train_loader, val_loader = data_loader.data_from_data_info(model_info["data"])
 
-#### train
-import numpy as np
+### pre train
 import ignite_train
 if in_ipynb(): importlib.reload(ignite_train)
 
-print(model_info)
+print("Pre training")
+model_info["training"]["max_epochs"] = 100
+ignite_train.run(model, 
+    optimizer,
+    scheduler,
+    loss,
+    device,
+    train_loader,
+    training_history,
+    param_history,
+    model_info,
+    start_epoch,
+    path)
+
+#### get LR
+print("Get LR")
+import numpy as np
     
 all_histories = []
 all_lrs = []
@@ -78,8 +93,6 @@ with tqdm(total=5) as pbar:
                 model_info,
                 start_epoch,
                 path)
-        print(type(out['nll']))
-        print(out['nll'])
 
         out_tensor = np.array(out['nll'])
         all_histories.append(out_tensor)
