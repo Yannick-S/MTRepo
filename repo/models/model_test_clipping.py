@@ -27,8 +27,8 @@ class Net(torch.nn.Module):
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 500
-        self.save_every = 50
+        self.max_epochs = 5000
+        self.save_every = 500
 
         #model
         self.k = 20
@@ -114,7 +114,7 @@ class Net(torch.nn.Module):
             sch = CyclicLR(opt, 
                            base_lr=1e-4,
                            max_lr=5e-4,
-                           step_size=20,
+                           step_size=200,
                            mode='triangular'
                            )
             return opt, sch
