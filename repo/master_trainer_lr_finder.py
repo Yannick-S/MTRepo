@@ -7,11 +7,15 @@ if in_ipynb():
     os.chdir("..")
     #! git pull
     os.chdir("repo")
+if in_ipynb():
+    from tqdm import tqdm_notebook as tqdm
+else:
+    from tqdm import tqdm
 
 load_from_file = False
 start_epoch = 0
 #### prepare model
-import models.model_test_clipping as mod
+import models.model_test_lr as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
@@ -38,21 +42,52 @@ if in_ipynb(): importlib.reload(data_loader)
 train_loader, val_loader = data_loader.data_from_data_info(model_info["data"])
 
 #### train
+import numpy as np
 import ignite_train
 if in_ipynb(): importlib.reload(ignite_train)
 
 print(model_info)
     
-quit()
+all_histories = []
+all_lrs = []
 
-ignite_train.run(model, 
-    optimizer,
-    scheduler,
-    loss,
-    device,
-    train_loader,
-    training_history,
-    param_history,
-    model_info,
-    start_epoch,
-    path)
+import utility.lr_getter
+
+lr_g = utility.lr_getter.lr_exp(start=1, decay=0.5)
+
+with tqdm(total=10) as pbar:
+    for i in range(10):
+        model_info["training"]["max_epochs"] = 300
+
+        training_history['nll'] = []
+        training_history['acc'] = []
+
+        optimizer, scheduler = model.get_optimizer()
+        for param_group in optimizer.param_groups:
+            new_lr = lr_g.next() 
+            all_lrs.append(new_lr)
+            param_group['lr'] = all_lrs[-1]
+
+        out = ignite_train.run_LR_find(model, 
+                optimizer,
+                scheduler,
+                loss,
+                device,
+                train_loader,
+                training_history,
+                param_history,
+                model_info,
+                start_epoch,
+                path)
+        print(type(out['nll']))
+        print(out['nll'])
+
+        out_tensor = np.array(out['nll'])
+        all_histories.append(out_tensor)
+
+        pbar.update(1)
+
+import plot_results.plot_hist 
+if in_ipynb(): importlib.reload(plot_results.plot_hist)
+
+plot_results.plot_hist.plot_lr(all_histories, all_lrs)

@@ -82,9 +82,70 @@ def run(model,
     @trainer.on(Events.EPOCH_COMPLETED)
     def show_bar(engine):
         pbar.update(1)
-        SystemError
     trainer.run(train_loader, max_epochs=model_info["training"]["max_epochs"])
     pbar.close()
+
+
+def run_LR_find(model, 
+    optimizer,
+    scheduler,
+    loss_fn, 
+    device, 
+    train_loader, 
+    training_history,
+    param_history,
+    model_info,
+    start_epoch,
+    path
+    ):
+    def prep_batch(batch, device=device, non_blocking=False):
+        return batch.to(device), batch.y.to(device)
+    
+    def update(trainer, batch):
+        model.train()
+        optimizer.zero_grad()
+        x, y = prep_batch(batch, device=device, non_blocking=False)
+        y_pred = model(x)
+        loss = loss_fn(y_pred, y)
+        loss.backward()
+        ### do clipping here
+        for param in model.parameters():
+            param.grad.data.clamp_(-1,1)
+
+        optimizer.step()
+        return loss.item()    
+
+    trainer = Engine(update)
+
+    torch.save(model.state_dict(), '/tmp/model.pth')
+
+    evaluator = create_supervised_evaluator(model,
+                                        metrics={'accuracy': Accuracy(),
+                                        'nll': Loss(loss_fn)},
+                                        device=device,
+                                        prepare_batch=prep_batch)
+
+    from event_handlers.scheduler import do_scheduler
+    trainer.add_event_handler(
+        Events.EPOCH_STARTED,
+        do_scheduler,
+        optimizer, scheduler)
+    
+    from event_handlers.log_training import log_training_results
+    trainer.add_event_handler(
+            Events.EPOCH_COMPLETED,
+            log_training_results,
+            evaluator, train_loader, training_history)
+
+    trainer.run(train_loader, max_epochs=model_info["training"]["max_epochs"])
+
+    model.load_state_dict(torch.load('/tmp/model.pth'))
+
+    return training_history
+
+
+
+
 
 
 
