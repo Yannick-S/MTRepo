@@ -94,7 +94,7 @@ class Net(torch.nn.Module):
                             lr=self.lr)
             sch = CyclicLR(opt, 
                            base_lr=1e-4,
-                           max_lr=5e-4,
+                           max_lr=1e-4,
                            step_size=200,
                            mode='triangular'
                            )

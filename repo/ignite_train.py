@@ -88,7 +88,6 @@ def run(model,
 
 def run_LR_find(model, 
     optimizer,
-    scheduler,
     loss_fn, 
     device, 
     train_loader, 
@@ -125,12 +124,6 @@ def run_LR_find(model,
                                         device=device,
                                         prepare_batch=prep_batch)
 
-    from event_handlers.scheduler import do_scheduler
-    trainer.add_event_handler(
-        Events.EPOCH_STARTED,
-        do_scheduler,
-        optimizer, scheduler)
-    
     from event_handlers.log_training import log_training_results
     trainer.add_event_handler(
             Events.EPOCH_COMPLETED,

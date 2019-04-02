@@ -53,10 +53,10 @@ all_lrs = []
 
 import utility.lr_getter
 
-lr_g = utility.lr_getter.lr_exp(start=1, decay=0.5)
+lr_g = utility.lr_getter.lr_exp(start=0.1, decay=0.5)
 
-with tqdm(total=10) as pbar:
-    for i in range(10):
+with tqdm(total=5) as pbar:
+    for i in range(5):
         model_info["training"]["max_epochs"] = 300
 
         training_history['nll'] = []
@@ -70,7 +70,6 @@ with tqdm(total=10) as pbar:
 
         out = ignite_train.run_LR_find(model, 
                 optimizer,
-                scheduler,
                 loss,
                 device,
                 train_loader,
