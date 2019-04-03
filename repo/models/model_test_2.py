@@ -8,6 +8,7 @@ from .layers.directional_spline_conv_3d import DirectionalSplineConv3D
 from .layers.directional_dense_2 import DirectionalDense
 
 from torch.nn import Sequential , Linear , ReLU
+from utility.cyclic_lr import CyclicLR
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -104,7 +105,7 @@ class Net(torch.nn.Module):
 
         }
         return model_info
-        
+
     def get_optimizer(self):
         if self.optimizer_name == 'Adam':
             opt = torch.optim.Adam(self.parameters(), 
