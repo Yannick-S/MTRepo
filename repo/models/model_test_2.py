@@ -9,6 +9,7 @@ from .layers.directional_dense_2 import DirectionalDense
 
 from torch.nn import Sequential , Linear , ReLU
 from utility.cyclic_lr import CyclicLR
+
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()

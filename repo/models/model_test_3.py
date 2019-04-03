@@ -8,6 +8,8 @@ from .layers.directional_spline_conv_3d import DirectionalSplineConv3D
 from .layers.directional_dense_3 import DirectionalDense
 
 from torch.nn import Sequential , Linear , ReLU
+from utility.cyclic_lr import CyclicLR
+
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -21,12 +23,12 @@ class Net(torch.nn.Module):
         #data
         self.data_name = "Geometry"
         self.batch_size = 20
-        self.nr_points = 1000
+        self.nr_points = 1024
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
         self.max_epochs = 1001
-        self.save_every = 1000
+        self.save_every = 500
 
         #model
         self.k = 20
@@ -107,8 +109,26 @@ class Net(torch.nn.Module):
 
     def get_optimizer(self):
         if self.optimizer_name == 'Adam':
-            return torch.optim.Adam(self.parameters(),
+            opt = torch.optim.Adam(self.parameters(), 
+                            lr=self.lr)
+            sch = CyclicLR(opt, 
+                           base_lr=0.00005,
+                           max_lr= 0.0002,
+                           step_size=200,
+                           mode='triangular'
+                           )
+            return opt, sch
+                                         
+        if self.optimizer_name == 'SGD':
+            opt = torch.optim.SGD(self.parameters(),
                                           lr=self.lr)
+            sch = CyclicLR(opt, 
+                           base_lr=1e-4,
+                           max_lr=5e-4,
+                           step_size=20,
+                           mode='triangular'
+                           )
+            return opt, sch
         else:
             raise NotImplementedError
 
