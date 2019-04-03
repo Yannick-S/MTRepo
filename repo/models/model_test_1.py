@@ -111,9 +111,9 @@ class Net(torch.nn.Module):
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = CyclicLR(opt, 
-                           base_lr=0.00145,
-                           max_lr= 0.00055,
-                           step_size=250,
+                           base_lr=0.00035,
+                           max_lr= 0.00135,
+                           step_size=200,
                            mode='triangular'
                            )
             return opt, sch
