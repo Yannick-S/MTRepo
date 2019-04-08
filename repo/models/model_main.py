@@ -77,6 +77,8 @@ class Net(torch.nn.Module):
 
     def forward(self, data):
         pos, edge_index, batch = data.pos, data.edge_index, data.batch
+        real_batch_size = pos.size(0) /self.nr_points
+        real_batch_size = int(real_batch_size)
 
         # Build first edges
         edge_index = knn_graph(pos, self.k, batch, loop=False)
@@ -90,7 +92,7 @@ class Net(torch.nn.Module):
         y1 = self.nn1(features_dd2)
         y1 = torch.nn.functional.relu(y1)
 
-        y1 = y1.view(self.batch_size, self.nr_points, -1)
+        y1 = y1.view(real_batch_size, self.nr_points, -1)
         y1 = torch.max(y1, dim=1)[0]
 
         y2 = self.nn2(y1)
