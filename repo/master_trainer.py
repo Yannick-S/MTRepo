@@ -11,7 +11,7 @@ if in_ipynb():
 load_from_file = False
 start_epoch = 0
 #### prepare model
-import models.model_test_1 as mod
+import models.model_main as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
