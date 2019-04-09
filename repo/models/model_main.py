@@ -17,7 +17,7 @@ class Net(torch.nn.Module):
         self.name = "main"
         #optimizer
         self.lr = 0.001
-        self.optimizer_name = 'Adam-Exp'
+        self.optimizer_name = 'Adam-Tri'
 
         #data
         #self.data_name = "ModelNet10"
@@ -27,7 +27,7 @@ class Net(torch.nn.Module):
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 601 
+        self.max_epochs = 1001 
         self.save_every = 200
 
         #model
