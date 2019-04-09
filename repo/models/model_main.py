@@ -19,7 +19,7 @@ class Net(torch.nn.Module):
         self.name = "main"
         #optimizer
         self.lr = 0.001
-        self.optimizer_name = 'Adam'
+        self.optimizer_name = 'Adam-Exp'
 
         #data
         self.data_name = "ModelNet10"
@@ -128,7 +128,15 @@ class Net(torch.nn.Module):
         return model_info
 
     def get_optimizer(self):
-        if self.optimizer_name == 'Adam':
+        if self.optimizer_name == 'Adam-Exp':
+            opt = torch.optim.Adam(self.parameters(), 
+                            lr=self.lr)
+            sch = torch.optim.lr_scheduler.StepLR(opt,
+                                                  step_size=20,
+                                                  gamma=0.5)
+
+            return opt, sch
+        if self.optimizer_name == 'Adam-Tri':
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = CyclicLR(opt, 
