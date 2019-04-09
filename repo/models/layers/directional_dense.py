@@ -9,18 +9,24 @@ from utility.diag import diag
 from utility.utility import plot_point_cloud
 
 class DirectionalDense(MessagePassing):
-    def __init__(self, l, k, in_size, mlp, out_size, with_pos=True):
+    def __init__(self, l, k,  mlp,
+                 conv_p = True,
+                 conv_fc = True,
+                 conv_fn = True,
+                 out_3d = True):
         super(DirectionalDense, self).__init__()
         self.k = k
         self.l = l if l <= k else k
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
-        self.in_size = in_size
         self.net = mlp
-        self.out_size = out_size
 
-        self.with_pos = with_pos
+        self.conv_p  = conv_p
+        self.conv_fc = conv_fc
+        self.conv_fn = conv_fn
+
+        self.out_3d = out_3d 
 
     def forward(self, pos, edge_index, features):
         # center the clusters, make view
@@ -37,28 +43,53 @@ class DirectionalDense(MessagePassing):
         V_t = torch.transpose(V, 1,2)
 
         # apply projections to clusters
-        if self.with_pos:
+        if self.conv_p:
            directional_clusters = torch.bmm(clusters, V_t) 
            signs = directional_clusters[:,:,2].sum(dim=1).sign()
            directional_clusters[:,:,2] = directional_clusters[:,:,2] * signs.view(-1,1)
 
         # apply projection to features
-        clusters_feature = features[edge_index[1,:]]
-        clusters_feature = clusters_feature.view(nr_points, -1 ,3)
-        directional_features = torch.bmm(clusters_feature, V_t)
-        directional_features = directional_features.view(nr_points,self.k,-1)
+        if self.conv_fn:
+            clusters_feature_neighbor = features[edge_index[1,:]]
+            clusters_feature_neighbor = clusters_feature_neighbor.view(nr_points, -1 ,3)
+            directional_features_neighbor = torch.bmm(clusters_feature_neighbor, V_t)
+            directional_features_neighbor = directional_features_neighbor.view(nr_points,self.k,-1)
+
+        if self.conv_fc:
+            clusters_feature_central = features[edge_index[1,:]]
+            clusters_feature_central = clusters_feature_central.view(nr_points, -1 ,3)
+            directional_features_central = torch.bmm(clusters_feature_central, V_t)
+            directional_features_central = directional_features_central.view(nr_points,self.k,-1)
 
         # concatenate the features and positions
-        if self.with_pos:
-            concat = torch.cat((directional_clusters, directional_features), dim=2).view(-1,self.in_size)
+        if self.conv_p:
+            concat = directional_clusters 
+            if self.conv_fn:
+                concat = torch.cat((concat, directional_features_neighbor), dim=2)
+            if self.conv_fc:
+                concat = torch.cat((concat, directional_features_central), dim=2)
+        elif self.conv_fn:
+            concat = directional_features_neighbor 
+            if self.conv_fc:
+                concat = torch.cat((concat, directional_features_central), dim=2)
         else:
-            concat = directional_features.view(-1, self.in_size)
+            concat = directional_features_central
+        concat = concat.view(nr_points * self.k, -1) # -1 = in_size to conv
 
         # do the inner NN
         out = self.net(concat)
+        out_size = out.size(1)
 
         # agregate
-        out = out.view(-1, self.k, self.out_size)
+        out = out.view(nr_points, self.k,-1)
         out = out.sum(dim=1)
+        
+        if self.out_3d == False:
+            return pos, edge_index, out
+
+        # rotate results back
+        out = out.view(-1,out_size,1).repeat(1,1,3)
+        out_V = V[:,2].view(-1,1,3).repeat(1,out_size,1)
+        out = torch.mul(out, out_V)
 
         return pos, edge_index, out

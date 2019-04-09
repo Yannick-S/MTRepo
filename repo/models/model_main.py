@@ -4,9 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import knn_graph, fps
 
 import torch.nn.functional as F
-from .layers.directional_spline_conv_3d import DirectionalSplineConv3D
-from .layers.directional_dense_3d_pos import DirectionalDense3D as DD3Dpos
-from .layers.directional_dense_3d_feat import DirectionalDense3D as DD3Dfeat
+from .layers.directional_dense import DirectionalDense as DD
 
 from torch.nn import Sequential , Linear , ReLU
 from utility.cyclic_lr import CyclicLR
@@ -41,16 +39,21 @@ class Net(torch.nn.Module):
         layers = []
         layers.append(Linear(self.in_size, 64))
         layers.append(ReLU())
+        layers.append(torch.nn.BatchNorm1d(64))
         layers.append(Linear(64 , 64))
         layers.append(ReLU())
+        layers.append(torch.nn.BatchNorm1d(64))
         layers.append(Linear(64, self.out_size))
         layers.append(ReLU())
+        layers.append(torch.nn.BatchNorm1d(self.out_size))
         dense3dnet = Sequential(*layers)
-        self.dd = DD3Dpos(l = self.l,
-                                   k = self.k,
-                                   in_size = self.in_size,
-                                   mlp = dense3dnet,
-                                   out_size = self.out_size)
+        self.dd = DD(l = self.l,
+                        k = self.k,
+                        mlp = dense3dnet,
+                        conv_p  = True,
+                        conv_fc = False,
+                        conv_fn = False,
+                        out_3d  = True)
 
         # DD2
         self.in_size_2 = 64 * 3 
@@ -58,22 +61,26 @@ class Net(torch.nn.Module):
         layers2 = []
         layers2.append(Linear(self.in_size_2, self.out_size_2))
         layers2.append(ReLU())
+        layers2.append(torch.nn.BatchNorm1d(self.out_size_2))
         dense3dnet2 = Sequential(*layers2)
-        self.dd2 = DD3Dfeat(l = self.l,
-                                   k = self.k,
-                                   in_size = self.in_size_2,
-                                   mlp = dense3dnet2,
-                                   out_size = self.out_size_2)
+        self.dd2 = DD(l = self.l,
+                        k = self.k,
+                        mlp = dense3dnet2,
+                        conv_p  = False,
+                        conv_fc = False,
+                        conv_fn = True,
+                        out_3d  = False)
 
 
         self.nn1 = torch.nn.Linear(self.out_size_2, 1024)
+        self.bn1 = torch.nn.BatchNorm1d(1024)
         self.nn2 = torch.nn.Linear(1024, 512)
+        self.bn2 = torch.nn.BatchNorm1d(512)
         self.nn3 = torch.nn.Linear(512, 265)
+        self.bn3 = torch.nn.BatchNorm1d(265)
         self.nn4 = torch.nn.Linear(265, self.nr_classes)
 
         self.sm = torch.nn.LogSoftmax(dim=1)
-
-
 
     def forward(self, data):
         pos, edge_index, batch = data.pos, data.edge_index, data.batch
@@ -87,19 +94,22 @@ class Net(torch.nn.Module):
         _,_,features_dd = self.dd(pos, edge_index, None)
         _,_,features_dd2 = self.dd2(pos, edge_index, features_dd)
 
-        features_dd2 = features_dd2.norm(dim=2)
 
         y1 = self.nn1(features_dd2)
-        y1 = torch.nn.functional.relu(y1)
 
         y1 = y1.view(real_batch_size, self.nr_points, -1)
         y1 = torch.max(y1, dim=1)[0]
 
+        y1 = torch.nn.functional.relu(y1)
+        y1 = self.bn1(y1)
+
         y2 = self.nn2(y1)
         y2 = torch.nn.functional.relu(y2)
+        y2 = self.bn2(y2)
 
         y3 = self.nn3(y2)
         y3 = torch.nn.functional.relu(y3)
+        y3 = self.bn3(y3)
 
         y4 = self.nn4(y3)
         out = self.sm(y4)
