@@ -20,14 +20,15 @@ class Net(torch.nn.Module):
         self.optimizer_name = 'Adam-Exp'
 
         #data
-        self.data_name = "ModelNet10"
-        self.batch_size = 10 
-        self.nr_points = 1024
+        #self.data_name = "ModelNet10"
+        self.data_name = "Geometry"
+        self.batch_size = 40
+        self.nr_points = 50
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 40 
-        self.save_every = 1
+        self.max_epochs = 601 
+        self.save_every = 200
 
         #model
         self.k = 20
@@ -101,7 +102,9 @@ class Net(torch.nn.Module):
         y1 = torch.max(y1, dim=1)[0]
 
         y1 = torch.nn.functional.relu(y1)
+        print(y1.size())
         y1 = self.bn1(y1)
+        print(y1.size())
 
         y2 = self.nn2(y1)
         y2 = torch.nn.functional.relu(y2)

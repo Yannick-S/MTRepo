@@ -43,8 +43,9 @@ class GeometricShapesLoader(BaseDataLoader):
 
         dataset = dataset.shuffle()
 
-        val_loader   = DataLoader(dataset, batch_size=self.batch_size)
-        train_loader = DataLoader(dataset, batch_size=self.batch_size)
+        val_loader   = DataLoader(dataset, batch_size=self.batch_size, drop_last=True)
+        train_loader = DataLoader(dataset, batch_size=self.batch_size, drop_last=True)
+
 
         return train_loader, val_loader
 
