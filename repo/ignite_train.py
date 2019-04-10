@@ -8,7 +8,7 @@ else:
 import datetime 
 import os
 from plot_results.setup_file import save_file, load_file
-
+from utility.tictoc import TicToc
 import torch
 
 def run(model, 
@@ -23,21 +23,50 @@ def run(model,
     start_epoch,
     path
     ):
+
+    ttlist = []
+    for i in range(7):
+        ttlist.append(TicToc(str(i)))
+
+    ttcounter = 0
+
     def prep_batch(batch, device=device, non_blocking=False):
         return batch.to(device), batch.y.to(device)
     
     def update(trainer, batch):
+        nonlocal ttcounter
+        nonlocal ttlist
+        ttcounter += 1
+        if ttcounter % 100 == 0:
+            print("Run:")
+            for i in range(7):
+                print("\t", ttlist[i])
+        ttlist[0].tic()
         model.train()
         optimizer.zero_grad()
+        ttlist[0].toc()
+        ttlist[1].tic()
         x, y = prep_batch(batch, device=device, non_blocking=False)
+        ttlist[1].toc()
+        ttlist[2].tic()
         y_pred = model(x)
+        ttlist[2].toc()
+        ttlist[3].tic()
         loss = loss_fn(y_pred, y)
+        ttlist[3].toc()
+        ttlist[4].tic()
         loss.backward()
+        ttlist[4].toc()
         ### do clipping here
+        ttlist[5].tic()
         for param in model.parameters():
             param.grad.data.clamp_(-1,1)
+        ttlist[5].toc()
 
+        ttlist[6].tic()
         optimizer.step()
+        ttlist[6].toc()
+
         return loss.item()    
 
     trainer = Engine(update)

@@ -24,8 +24,8 @@ class Net(torch.nn.Module):
         #data
         self.data_name = "ModelNet10"
         #self.data_name = "Geometry"
-        self.batch_size = 40
-        self.nr_points = 1024
+        self.batch_size = 4
+        self.nr_points = 50
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
@@ -93,9 +93,10 @@ class Net(torch.nn.Module):
 
     def forward(self, data):
         self.ttcounter += 1
-        #if self.ttcounter % 100 == 0:
-        #    for i in range(6):
-        #        print(self.ttlist[i])
+        if self.ttcounter % 100 == 0:
+            print("Main:")
+            for i in range(6):
+                print("\t", self.ttlist[i])
 
 
         pos, edge_index, batch = data.pos, data.edge_index, data.batch

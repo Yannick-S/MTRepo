@@ -37,8 +37,9 @@ class DirectionalDense(MessagePassing):
     def forward(self, pos, edge_index, features, V_t = None):
         self.ttcounter += 1
         if self.ttcounter % 100 == 0:
+            print("DD:")
             for i in range(9):
-                print(self.ttlist[i])
+                print("\t", self.ttlist[i])
 
         # center the clusters, make view
         self.ttlist[0].tic()
