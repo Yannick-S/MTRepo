@@ -55,6 +55,8 @@ class DirectionalDense(MessagePassing):
 
         # get the projections
         self.ttlist[2].tic()
+        print(self.device)
+        print(cov_mat.size())
         S, V = diag(cov_mat, nr_iterations=5, device=self.device)
         V_t = torch.transpose(V, 1,2)
         self.ttlist[2].toc()
