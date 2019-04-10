@@ -9,6 +9,8 @@ from .layers.directional_dense import DirectionalDense as DD
 from torch.nn import Sequential , Linear , ReLU
 from utility.cyclic_lr import CyclicLR
 
+from utility.tictoc import TicToc
+
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -27,8 +29,8 @@ class Net(torch.nn.Module):
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 1001 
-        self.save_every = 200
+        self.max_epochs = 501 
+        self.save_every = 100
 
         #model
         self.k = 20
@@ -83,7 +85,19 @@ class Net(torch.nn.Module):
 
         self.sm = torch.nn.LogSoftmax(dim=1)
 
+        self.ttlist = []
+        for i in range(6):
+            self.ttlist.append(TicToc(str(i)))
+
+        self.ttcounter = 0
+
     def forward(self, data):
+        self.ttcounter += 1
+        if self.ttcounter % 100 == 0:
+            for i in range(6):
+                print(self.ttlist[i])
+
+
         pos, edge_index, batch = data.pos, data.edge_index, data.batch
         real_batch_size = pos.size(0) /self.nr_points
         real_batch_size = int(real_batch_size)
@@ -92,28 +106,38 @@ class Net(torch.nn.Module):
         edge_index = knn_graph(pos, self.k, batch, loop=False)
 
         #extract features in 3d
+        self.ttlist[0].tic()
         _,_,features_dd = self.dd(pos, edge_index, None)
+        self.ttlist[0].toc()
+        self.ttlist[1].tic()
         _,_,features_dd2 = self.dd2(pos, edge_index, features_dd)
+        self.ttlist[1].toc()
 
 
+        self.ttlist[2].tic()
         y1 = self.nn1(features_dd2)
-
         y1 = y1.view(real_batch_size, self.nr_points, -1)
         y1 = torch.max(y1, dim=1)[0]
-
         y1 = torch.nn.functional.relu(y1)
         y1 = self.bn1(y1)
+        self.ttlist[2].toc()
 
+        self.ttlist[3].tic()
         y2 = self.nn2(y1)
         y2 = torch.nn.functional.relu(y2)
         y2 = self.bn2(y2)
+        self.ttlist[3].toc()
 
+        self.ttlist[4].tic()
         y3 = self.nn3(y2)
         y3 = torch.nn.functional.relu(y3)
         y3 = self.bn3(y3)
+        self.ttlist[4].toc()
 
+        self.ttlist[5].tic()
         y4 = self.nn4(y3)
         out = self.sm(y4)
+        self.ttlist[5].toc()
             
         return out
 
@@ -144,7 +168,7 @@ class Net(torch.nn.Module):
                             lr=self.lr)
             sch = torch.optim.lr_scheduler.StepLR(opt,
                                                   step_size=20,
-                                                  gamma=0.5)
+                                                  gamma=0.8)
 
             return opt, sch
         if self.optimizer_name == 'Adam-Tri':
