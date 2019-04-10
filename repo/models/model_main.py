@@ -107,10 +107,10 @@ class Net(torch.nn.Module):
 
         #extract features in 3d
         self.ttlist[0].tic()
-        _,_,features_dd = self.dd(pos, edge_index, None)
+        _,_,features_dd, V_t = self.dd(pos, edge_index, None)
         self.ttlist[0].toc()
         self.ttlist[1].tic()
-        _,_,features_dd2 = self.dd2(pos, edge_index, features_dd)
+        _,_,features_dd2, _  = self.dd2(pos, edge_index, features_dd, V_t)
         self.ttlist[1].toc()
 
 

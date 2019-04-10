@@ -34,9 +34,9 @@ class DirectionalDense(MessagePassing):
 
         self.ttcounter = 0
 
-    def forward(self, pos, edge_index, features):
+    def forward(self, pos, edge_index, features, V_t = None):
         self.ttcounter += 1
-        if self.ttcounter % 1000 == 0:
+        if self.ttcounter % 100 == 0:
             for i in range(9):
                 print(self.ttlist[i])
 
@@ -49,16 +49,16 @@ class DirectionalDense(MessagePassing):
         
         # get covariance matrices:
         self.ttlist[1].tic()
-        clusters_t = torch.transpose(clusters,dim0=1,dim1=2)
-        cov_mat = torch.bmm( clusters_t[:,:,:self.l], clusters[:,:self.l,:])
+        if V_t is None:
+            clusters_t = torch.transpose(clusters,dim0=1,dim1=2)
+            cov_mat = torch.bmm( clusters_t[:,:,:self.l], clusters[:,:self.l,:])
         self.ttlist[1].toc()
 
         # get the projections
         self.ttlist[2].tic()
-        print(self.device)
-        print(cov_mat.size())
-        S, V = diag(cov_mat, nr_iterations=5, device=self.device)
-        V_t = torch.transpose(V, 1,2)
+        if V_t is None:
+            S, V = diag(cov_mat, nr_iterations=5, device=self.device)
+            V_t = torch.transpose(V, 1,2)
         self.ttlist[2].toc()
 
         # apply projections to clusters
@@ -116,7 +116,7 @@ class DirectionalDense(MessagePassing):
         self.ttlist[7].toc()
 
         if self.out_3d == False:
-            return pos, edge_index, out
+            return pos, edge_index, out, V_t
 
         # rotate results back
         self.ttlist[8].tic()
@@ -125,4 +125,4 @@ class DirectionalDense(MessagePassing):
         out = torch.mul(out, out_V)
         self.ttlist[8].toc()
 
-        return pos, edge_index, out
+        return pos, edge_index, out, V_t
