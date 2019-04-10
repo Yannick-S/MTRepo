@@ -36,7 +36,7 @@ class DirectionalDense(MessagePassing):
 
     def forward(self, pos, edge_index, features):
         self.ttcounter += 1
-        if self.ttcounter % 100 == 0:
+        if self.ttcounter % 1000 == 0:
             for i in range(9):
                 print(self.ttlist[i])
 
@@ -55,6 +55,7 @@ class DirectionalDense(MessagePassing):
 
         # get the projections
         self.ttlist[2].tic()
+        print(cov_mat.size())
         S, V = diag(cov_mat, nr_iterations=5, device=self.device)
         V_t = torch.transpose(V, 1,2)
         self.ttlist[2].toc()
