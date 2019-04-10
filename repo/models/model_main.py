@@ -93,9 +93,9 @@ class Net(torch.nn.Module):
 
     def forward(self, data):
         self.ttcounter += 1
-        if self.ttcounter % 100 == 0:
-            for i in range(6):
-                print(self.ttlist[i])
+        #if self.ttcounter % 100 == 0:
+        #    for i in range(6):
+        #        print(self.ttlist[i])
 
 
         pos, edge_index, batch = data.pos, data.edge_index, data.batch
