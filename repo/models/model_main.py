@@ -17,7 +17,7 @@ class Net(torch.nn.Module):
         self.name = "main"
         #optimizer
         self.lr = 0.001
-        self.optimizer_name = 'Adam-Tri'
+        self.optimizer_name = 'Adam-Exp'
 
         #data
         #self.data_name = "ModelNet10"
@@ -102,9 +102,7 @@ class Net(torch.nn.Module):
         y1 = torch.max(y1, dim=1)[0]
 
         y1 = torch.nn.functional.relu(y1)
-        print(y1.size())
         y1 = self.bn1(y1)
-        print(y1.size())
 
         y2 = self.nn2(y1)
         y2 = torch.nn.functional.relu(y2)
