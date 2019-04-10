@@ -36,7 +36,7 @@ class DirectionalDense(MessagePassing):
 
     def forward(self, pos, edge_index, features):
         self.ttcounter += 1
-        if self.ttcounter % 10 == 0:
+        if self.ttcounter % 100 == 0:
             for i in range(9):
                 print(self.ttlist[i])
 
