@@ -7,7 +7,7 @@ from torch.nn import Sequential , Linear , ReLU
 
 from utility.diag import diag
 from utility.utility import plot_point_cloud
-
+from utility.tictoc import TicToc
 class DirectionalDense(MessagePassing):
     def __init__(self, l, k,  mlp,
                  conv_p = True,
@@ -29,16 +29,16 @@ class DirectionalDense(MessagePassing):
         self.out_3d = out_3d 
 
         self.ttlist = []
-        for i in range(8):
+        for i in range(9):
             self.ttlist.append(TicToc(str(i)))
 
         self.ttcounter = 0
 
     def forward(self, pos, edge_index, features):
         self.ttcounter += 1
-        if self.ttcounter % 100 == 0:
-            for i in range(8):
-                print(self.ttlist[i]
+        if self.ttcounter % 10 == 0:
+            for i in range(9):
+                print(self.ttlist[i])
 
         # center the clusters, make view
         self.ttlist[0].tic()
