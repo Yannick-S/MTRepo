@@ -29,8 +29,8 @@ class Net(torch.nn.Module):
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 201
-        self.save_every = 100
+        self.max_epochs = 30
+        self.save_every = 2
 
         #model
         self.k = 20
@@ -168,8 +168,8 @@ class Net(torch.nn.Module):
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = torch.optim.lr_scheduler.StepLR(opt,
-                                                  step_size=20,
-                                                  gamma=0.7)
+                                                  step_size=3,
+                                                  gamma=0.93)
 
             return opt, sch
         if self.optimizer_name == 'Adam-Tri':
