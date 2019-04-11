@@ -60,6 +60,8 @@ def run(model,
         ### do clipping here
         ttlist[5].tic()
         for param in model.parameters():
+            if param.grad is None:
+                continue
             param.grad.data.clamp_(-1,1)
         ttlist[5].toc()
 
