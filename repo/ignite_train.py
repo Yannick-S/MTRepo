@@ -24,18 +24,20 @@ def run(model,
     path
     ):
 
+    expected_batch_size = model_info["data"]["batch_size"]
     ttlist = []
     for i in range(7):
         ttlist.append(TicToc(str(i)))
-
     ttcounter = 0
 
     def prep_batch(batch, device=device, non_blocking=False):
         return batch.to(device), batch.y.to(device)
     
     def update(trainer, batch):
+        nonlocal expected_batch_size
         nonlocal ttcounter
         nonlocal ttlist
+
         ttcounter += 1
         if ttcounter % 100 == 0:
             print("Run:")
@@ -49,6 +51,11 @@ def run(model,
         x, y = prep_batch(batch, device=device, non_blocking=False)
         ttlist[1].toc()
         ttlist[2].tic()
+
+        if expected_batch_size != len(x):
+            print(expected_batch_size)
+            print(type(x))
+            print(len(x))
         y_pred = model(x)
         ttlist[2].toc()
         ttlist[3].tic()
