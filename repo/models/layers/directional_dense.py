@@ -52,7 +52,8 @@ class DirectionalDense(MessagePassing):
         self.ttlist[1].tic()
         if V_t is None:
             clusters_t = torch.transpose(clusters,dim0=1,dim1=2)
-            cov_mat = torch.bmm( clusters_t[:,:,:self.l], clusters[:,:self.l,:])
+            cov_mat = torch.tensor((nr_points,3,3),dtype=torch.float, requires_grad=False)
+            torch.bmm( clusters_t[:,:,:self.l], clusters[:,:self.l,:], out=cov_mat)
         self.ttlist[1].toc()
 
         # get the projections
