@@ -25,56 +25,31 @@ def run(model,
     ):
 
     expected_batch_size = model_info["data"]["batch_size"]
-    ttlist = []
-    for i in range(7):
-        ttlist.append(TicToc(str(i)))
-    ttcounter = 0
 
     def prep_batch(batch, device=device, non_blocking=False):
         return batch.to(device), batch.y.to(device)
     
     def update(trainer, batch):
         nonlocal expected_batch_size
-        nonlocal ttcounter
-        nonlocal ttlist
 
-        ttcounter += 1
-        if ttcounter % 100 == 0:
-            print("Run:")
-            for i in range(7):
-                print("\t", ttlist[i])
-        ttlist[0].tic()
         model.train()
         optimizer.zero_grad()
-        ttlist[0].toc()
-        ttlist[1].tic()
         x, y = prep_batch(batch, device=device, non_blocking=False)
-        ttlist[1].toc()
-        ttlist[2].tic()
 
         if expected_batch_size != x.num_graphs:
             print(expected_batch_size)
             print(type(x))
             print(x.num_graphs)
         y_pred = model(x)
-        ttlist[2].toc()
-        ttlist[3].tic()
         loss = loss_fn(y_pred, y)
-        ttlist[3].toc()
-        ttlist[4].tic()
         loss.backward()
-        ttlist[4].toc()
         ### do clipping here
-        ttlist[5].tic()
         for param in model.parameters():
             if param.grad is None:
                 continue
             param.grad.data.clamp_(-1,1)
-        ttlist[5].toc()
 
-        ttlist[6].tic()
         optimizer.step()
-        ttlist[6].toc()
 
         return loss.item()    
 

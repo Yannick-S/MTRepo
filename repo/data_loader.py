@@ -73,7 +73,6 @@ class ModelNet10Loader(BaseDataLoader):
         from torch_geometric.transforms import SamplePoints, Compose,  NormalizeScale, RandomRotate, RandomTranslate
         from torch_geometric.data import DataLoader
 
-
         trans = Compose((
                 SamplePoints(self.nr_points),
                 NormalizeScale(),

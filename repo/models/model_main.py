@@ -22,10 +22,10 @@ class Net(torch.nn.Module):
         self.optimizer_name = 'Adam-Exp'
 
         #data
-        self.data_name = "ModelNet10"
-        #self.data_name = "Geometry"
+        #self.data_name = "ModelNet10"
+        self.data_name = "Geometry"
         self.batch_size = 10
-        self.nr_points = 1024
+        self.nr_points = 30
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
@@ -85,19 +85,8 @@ class Net(torch.nn.Module):
 
         self.sm = torch.nn.LogSoftmax(dim=1)
 
-        self.ttlist = []
-        for i in range(6):
-            self.ttlist.append(TicToc(str(i)))
-
-        self.ttcounter = 0
 
     def forward(self, data):
-        self.ttcounter += 1
-        if self.ttcounter % 100 == 0:
-            print("Main:")
-            for i in range(6):
-                print("\t", self.ttlist[i])
-
 
         pos, edge_index, batch = data.pos, data.edge_index, data.batch
         real_batch_size = pos.size(0) /self.nr_points
@@ -107,41 +96,31 @@ class Net(torch.nn.Module):
         edge_index = knn_graph(pos, self.k, batch, loop=False)
 
         #extract features in 3d
-        self.ttlist[0].tic()
-        _,_,features_dd, V_t = self.dd(pos, edge_index, None)
-        self.ttlist[0].toc()
-        self.ttlist[1].tic()
-        _,_,features_dd2, _  = self.dd2(pos, edge_index, features_dd, V_t)
-        self.ttlist[1].toc()
+        _,_,features_dd, _ = self.dd(pos, edge_index, None)
+
+        with torch.no_grad():
+            edge_index = knn_graph(features_dd.view(pos.size(0), -1), self.k, batch, loop=False)
+
+        _,_,features_dd2, _  = self.dd2(pos, edge_index, features_dd)
 
 
-        self.ttlist[2].tic()
         y1 = self.nn1(features_dd2)
         y1 = y1.view(real_batch_size, self.nr_points, -1)
         y1 = torch.max(y1, dim=1)[0]
         y1 = torch.nn.functional.relu(y1)
         y1 = self.bn1(y1)
-        self.ttlist[2].toc()
 
-        self.ttlist[3].tic()
         y2 = self.nn2(y1)
         y2 = torch.nn.functional.relu(y2)
         y2 = self.bn2(y2)
-        self.ttlist[3].toc()
 
-        self.ttlist[4].tic()
         y3 = self.nn3(y2)
         y3 = torch.nn.functional.relu(y3)
         y3 = self.bn3(y3)
-        self.ttlist[4].toc()
 
-        self.ttlist[5].tic()
         y4 = self.nn4(y3)
         out = self.sm(y4)
-        self.ttlist[5].toc()
-            
         return out
-
     
     def get_info(self):
         model_info = {
@@ -195,5 +174,3 @@ class Net(torch.nn.Module):
             return opt, sch
         else:
             raise NotImplementedError
-
-
