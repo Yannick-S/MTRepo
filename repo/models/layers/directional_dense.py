@@ -64,28 +64,28 @@ class DirectionalDense(MessagePassing):
                 V_t = torch.transpose(V, 1,2)
             self.ttlist[2].toc()
 
-            # apply projections to clusters
-            self.ttlist[3].tic()
-            if self.conv_p:
-               directional_clusters = torch.bmm(clusters, V_t) 
-               signs = directional_clusters[:,:,2].sum(dim=1).sign()
-               directional_clusters[:,:,2] = directional_clusters[:,:,2] * signs.view(-1,1)
-            self.ttlist[3].toc()
+        # apply projections to clusters
+        self.ttlist[3].tic()
+        if self.conv_p:
+           directional_clusters = torch.bmm(clusters, V_t) 
+           signs = directional_clusters[:,:,2].sum(dim=1).sign()
+           directional_clusters[:,:,2] = directional_clusters[:,:,2] * signs.view(-1,1)
+        self.ttlist[3].toc()
 
-            # apply projection to features
+        # apply projection to features
 
-            self.ttlist[4].tic()
-            if self.conv_fn:
-                clusters_feature_neighbor = features[edge_index[1,:]]
-                clusters_feature_neighbor = clusters_feature_neighbor.view(nr_points, -1 ,3)
-                directional_features_neighbor = torch.bmm(clusters_feature_neighbor, V_t)
-                directional_features_neighbor = directional_features_neighbor.view(nr_points,self.k,-1)
-            if self.conv_fc:
-                clusters_feature_central = features[edge_index[1,:]]
-                clusters_feature_central = clusters_feature_central.view(nr_points, -1 ,3)
-                directional_features_central = torch.bmm(clusters_feature_central, V_t)
-                directional_features_central = directional_features_central.view(nr_points,self.k,-1)
-            self.ttlist[4].toc()
+        self.ttlist[4].tic()
+        if self.conv_fn:
+            clusters_feature_neighbor = features[edge_index[1,:]]
+            clusters_feature_neighbor = clusters_feature_neighbor.view(nr_points, -1 ,3)
+            directional_features_neighbor = torch.bmm(clusters_feature_neighbor, V_t)
+            directional_features_neighbor = directional_features_neighbor.view(nr_points,self.k,-1)
+        if self.conv_fc:
+            clusters_feature_central = features[edge_index[1,:]]
+            clusters_feature_central = clusters_feature_central.view(nr_points, -1 ,3)
+            directional_features_central = torch.bmm(clusters_feature_central, V_t)
+            directional_features_central = directional_features_central.view(nr_points,self.k,-1)
+        self.ttlist[4].toc()
 
         # concatenate the features and positions
 
