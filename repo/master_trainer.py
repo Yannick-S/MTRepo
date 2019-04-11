@@ -31,6 +31,7 @@ if load_from_file:
     model, optimizer, training_history, param_history, start_epoch, path = model_loader.load_model(model_info,model, optimizer)
 else:
     training_history, param_history, path = model_loader.else_load(model_info, model)
+    
 
 #### load data
 import data_loader
