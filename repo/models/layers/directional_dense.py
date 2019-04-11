@@ -47,6 +47,8 @@ class DirectionalDense(MessagePassing):
             if V_t is None:
                 S, V = diag(cov_mat, nr_iterations=5, device=self.device)
                 V_t = torch.transpose(V, 1,2)
+            else:
+                V = torch.transpose(V_t, 1,2)
 
         # apply projections to clusters
         if self.conv_p:

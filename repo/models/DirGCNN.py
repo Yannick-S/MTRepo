@@ -16,21 +16,21 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         #name
-        self.name = "main"
+        self.name = "DirGCNN"
         #optimizer
         self.lr = 0.001
         self.optimizer_name = 'Adam-Exp'
 
         #data
-        #self.data_name = "ModelNet10"
-        self.data_name = "Geometry"
-        self.batch_size = 10
-        self.nr_points = 30
+        self.data_name = "ModelNet10"
+        #self.data_name = "Geometry"
+        self.batch_size = 30
+        self.nr_points = 1024
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 30
-        self.save_every = 2
+        self.max_epochs = 60
+        self.save_every = 5
 
         #model
         self.k = 20
@@ -147,8 +147,8 @@ class Net(torch.nn.Module):
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = torch.optim.lr_scheduler.StepLR(opt,
-                                                  step_size=3,
-                                                  gamma=0.93)
+                                                  step_size=20,
+                                                  gamma=0.5)
 
             return opt, sch
         if self.optimizer_name == 'Adam-Tri':
