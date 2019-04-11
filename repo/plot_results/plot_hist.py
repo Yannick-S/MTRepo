@@ -19,6 +19,7 @@ def plot_lr(all_history, all_lrs, show=True):
         plt.show()
 
 def plot_grad(param_history, show=False):
+    return
     for i in param_history:
         tensor = torch.tensor(param_history[i]).numpy()
         n = tensor.shape[0]
