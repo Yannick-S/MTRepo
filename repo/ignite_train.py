@@ -52,10 +52,10 @@ def run(model,
         ttlist[1].toc()
         ttlist[2].tic()
 
-        if expected_batch_size != len(x):
+        if expected_batch_size != x.num_graphs:
             print(expected_batch_size)
             print(type(x))
-            print(len(x))
+            print(x.num_graphs)
         y_pred = model(x)
         ttlist[2].toc()
         ttlist[3].tic()
