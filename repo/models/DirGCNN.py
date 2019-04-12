@@ -22,15 +22,15 @@ class Net(torch.nn.Module):
         self.optimizer_name = 'Adam-Exp'
 
         #data
-        self.data_name = "ModelNet10"
-        #self.data_name = "Geometry"
-        self.batch_size = 30
+        #self.data_name = "ModelNet10"
+        self.data_name = "Geometry"
+        self.batch_size = 20
         self.nr_points = 1024
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 60
-        self.save_every = 5
+        self.max_epochs = 600
+        self.save_every = 100
 
         #model
         self.k = 20
