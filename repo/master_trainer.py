@@ -11,7 +11,7 @@ if in_ipynb():
 load_from_file = False
 start_epoch = 0
 #### prepare model
-import models.DirSplineCNN as mod
+import models.NonDirGCNN as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
