@@ -85,7 +85,9 @@ class Net(torch.nn.Module):
 
         self.sm = torch.nn.LogSoftmax(dim=1)
 
-        self.Id = torch.eye(3).view(1,3,3)
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        self.Id = torch.eye(3, device=self.device).view(1,3,3)
         self.Id = self.Id.repeat(self.nr_points * self.batch_size,1,1)
 
     def forward(self, data):
