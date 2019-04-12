@@ -152,7 +152,7 @@ class Net(torch.nn.Module):
                             lr=self.lr)
             sch = torch.optim.lr_scheduler.StepLR(opt,
                                                   step_size=20,
-                                                  gamma=0.5)
+                                                  gamma=0.9)
 
             return opt, sch
         if self.optimizer_name == 'Adam-Tri':
