@@ -36,19 +36,19 @@ class DirectionalDense(MessagePassing):
         clusters = clusters.view(-1,self.k,3)
         nr_points = clusters.size(0)
 
-        #with torch.no_grad():
+        with torch.no_grad():
             # get covariance matrices:
-        if V_t is None:
-            clusters_t = torch.transpose(clusters,dim0=1,dim1=2)
-            cov_mat = torch.tensor((nr_points,3,3),dtype=torch.float, requires_grad=False, device=self.device)
-            torch.bmm( clusters_t[:,:,:self.l], clusters[:,:self.l,:], out=cov_mat)
+            if V_t is None:
+                clusters_t = torch.transpose(clusters,dim0=1,dim1=2)
+                cov_mat = torch.tensor((nr_points,3,3),dtype=torch.float, requires_grad=False, device=self.device)
+                torch.bmm( clusters_t[:,:,:self.l], clusters[:,:self.l,:], out=cov_mat)
 
-        # get the projections
-        if V_t is None:
-            S, V = diag(cov_mat, nr_iterations=5, device=self.device)
-            V_t = torch.transpose(V, 1,2)
-        else:
-            V = torch.transpose(V_t, 1,2)
+            # get the projections
+            if V_t is None:
+                S, V = diag(cov_mat, nr_iterations=5, device=self.device)
+                V_t = torch.transpose(V, 1,2)
+            else:
+                V = torch.transpose(V_t, 1,2)
 
         # apply projections to clusters
         if self.conv_p:
