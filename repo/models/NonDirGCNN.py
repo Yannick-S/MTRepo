@@ -30,7 +30,7 @@ class Net(torch.nn.Module):
 
         #train_info
         self.max_epochs = 60
-        self.save_every = 3
+        self.save_every = 1
 
         #model
         self.k = 20
