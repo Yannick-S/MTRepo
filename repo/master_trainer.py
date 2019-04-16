@@ -8,7 +8,7 @@ if in_ipynb():
     #! git pull
     os.chdir("repo")
 
-load_from_file = False
+load_from_file = True
 start_epoch = 0
 #### prepare model
 import models.NonDirGCNN as mod
