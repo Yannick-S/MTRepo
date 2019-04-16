@@ -8,10 +8,10 @@ if in_ipynb():
     #! git pull
     os.chdir("repo")
 
-load_from_file = True
+load_from_file = False
 start_epoch = 0
 #### prepare model
-import models.NonDirGCNN as mod
+import models.DirCNN as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
