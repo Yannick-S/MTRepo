@@ -17,7 +17,7 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         #name
-        self.name = "DirSplineCNN2"
+        self.name = "DirSplineCNN3"
         #optimizer
         self.lr = 0.001
         self.optimizer_name = 'Adam-Exp'
@@ -38,8 +38,8 @@ class Net(torch.nn.Module):
         self.l = 7
         
         # DD1
-        self.filter_nr = 15
-        self.kernel_size = 15
+        self.filter_nr = 60
+        self.kernel_size = 7
 
         self.ds1 = DS(self.filter_nr,
                       self.l,
