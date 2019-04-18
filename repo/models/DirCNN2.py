@@ -16,7 +16,7 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         #name
-        self.name = "DirCNN"
+        self.name = "DirCNN2"
         #optimizer
         self.lr = 0.001
         self.optimizer_name = 'Adam-Exp'
@@ -29,8 +29,9 @@ class Net(torch.nn.Module):
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 60
-        self.save_every = 1
+        self.max_epochs = 90
+        self.save_every = 6
+        
 
         #model
         self.k = 20
@@ -144,7 +145,7 @@ class Net(torch.nn.Module):
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = torch.optim.lr_scheduler.StepLR(opt,
-                                                  step_size=2,
+                                                  step_size=6,
                                                   gamma=0.9)
 
             return opt, sch
