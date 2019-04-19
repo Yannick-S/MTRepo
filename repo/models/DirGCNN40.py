@@ -16,7 +16,7 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         #name
-        self.name = "DirGCNN"
+        self.name = "DirGCNN40"
         #optimizer
         self.lr = 0.001
         self.optimizer_name = 'Adam-Exp'
@@ -148,7 +148,7 @@ class Net(torch.nn.Module):
                             lr=self.lr)
             sch = torch.optim.lr_scheduler.StepLR(opt,
                                                   step_size=2,
-                                                  gamma=0.9)
+                                                  gamma=0.95)
 
             return opt, sch
         if self.optimizer_name == 'Adam-Tri':
