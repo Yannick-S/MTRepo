@@ -11,7 +11,7 @@ if in_ipynb():
 load_from_file = False
 start_epoch = 0
 #### prepare model
-import models.DirCNN as mod
+import models.DirCNNfps as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
