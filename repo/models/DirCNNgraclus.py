@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import knn_graph, fps
+from torch_geometric.nn import knn_graph, graclus, avg_pool_x, max_pool_x 
 
 import torch.nn.functional as F
 from .layers.directional_dense import DirectionalDense as DD
@@ -22,10 +22,10 @@ class Net(torch.nn.Module):
         self.optimizer_name = 'Adam-Exp'
 
         #data
-        #self.data_name = "ModelNet10"
-        self.data_name = "Geometry"
-        self.batch_size = 2
-        self.nr_points = 128
+        self.data_name = "ModelNet10"
+        #self.data_name = "Geometry"
+        self.batch_size = 20
+        self.nr_points = 1024
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
@@ -58,13 +58,7 @@ class Net(torch.nn.Module):
                         conv_fc = False,
                         conv_fn = False,
                         out_3d  = True)
-        ## POOLING:
-        self.ratio = 0.25
-        self.nr_points_fps = self.nr_points * self.ratio
-        if self.nr_points * self.ratio % 1 != 0:
-            print("Not a good ratio!")
-        self.nr_points_fps = int(self.nr_points_fps)
-
+ 
         # DD2
         self.in_size_2 = 64 * 3 
         self.out_size_2 = 128
@@ -106,23 +100,23 @@ class Net(torch.nn.Module):
         _,_,features_dd, _ = self.dd(pos, edge_index, None)
 
         #
-        index = fps(pos,batch=batch, ratio=self.ratio)
+        cluster = graclus(edge_index)
 
-        features_fps = features_dd[index]
-        pos_fps = pos[index] 
-        batch_fps = batch[index]
+        pos_gra, batch_gra = avg_pool_x(cluster, pos, batch)
+        features_gra, _ = max_pool_x(cluster, features_dd, batch)
 
-        edge_index_fps = knn_graph(pos_fps, self.k, batch_fps, loop=False)
+        edge_index_gra = knn_graph(pos_gra, self.k, batch_gra, loop=False)
 
-        _,_,features_dd2, _  = self.dd2(pos_fps, edge_index_fps, features_fps)
+        _,_,features_dd2, _  = self.dd2(pos_gra, edge_index_gra, features_gra)
 
         y1 = self.nn1(features_dd2)
-        y1 = y1.view(real_batch_size, self.nr_points_fps, -1)
-        y1 = torch.max(y1, dim=1)[0]
-        y1 = torch.nn.functional.relu(y1)
-        y1 = self.bn1(y1)
 
-        y2 = self.nn2(y1)
+        y1_pool, _ = max_pool_x(batch_gra, y1, batch_gra)
+
+        y1_pool = torch.nn.functional.relu(y1_pool)
+        y1_pool = self.bn1(y1_pool)
+
+        y2 = self.nn2(y1_pool)
         y2 = torch.nn.functional.relu(y2)
         y2 = self.bn2(y2)
 
@@ -132,6 +126,7 @@ class Net(torch.nn.Module):
 
         y4 = self.nn4(y3)
         out = self.sm(y4)
+
         return out
     
     def get_info(self):
