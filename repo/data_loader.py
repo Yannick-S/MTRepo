@@ -82,6 +82,7 @@ class ModelNet40Loader(BaseDataLoader):
                 RandomTranslate(0.01),
                 RandomRotate(180)))
 
+        #dataset = ModelNet('/media/j-pc-ub/ExtraLinux', name='40', train=True, transform=trans)
         dataset = ModelNet('data/mn40', name='40', train=True, transform=trans)
         nr_classes = len(dataset)
         self.nr_classes = nr_classes
