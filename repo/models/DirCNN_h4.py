@@ -59,7 +59,7 @@ class Net(torch.nn.Module):
                         out_3d  = True)
 
         # DD2
-        self.in_size_2 = 64 * 6 + 3
+        self.in_size_2 = 64 * 3 + 3
         self.out_size_2 = 128
         layers2 = []
         layers2.append(Linear(self.in_size_2, self.out_size_2))
@@ -70,7 +70,7 @@ class Net(torch.nn.Module):
                         k = self.k,
                         mlp = dense3dnet2,
                         conv_p  = True,
-                        conv_fc = True,
+                        conv_fc = False,
                         conv_fn = True,
                         out_3d  = False)
 

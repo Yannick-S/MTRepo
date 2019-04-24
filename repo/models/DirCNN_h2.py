@@ -5,6 +5,7 @@ from torch_geometric.nn import knn_graph, fps
 
 import torch.nn.functional as F
 from .layers.directional_dense import DirectionalDense as DD
+from .layers.directional_dense_minus import DirectionalDense as DDm
 
 from torch.nn import Sequential , Linear , ReLU
 from utility.cyclic_lr import CyclicLR
@@ -16,7 +17,7 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         #name
-        self.name = "DirCNNh3"
+        self.name = "DirCNNh2"
         #optimizer
         self.lr = 0.001
         self.optimizer_name = 'Adam-Exp'
@@ -59,14 +60,14 @@ class Net(torch.nn.Module):
                         out_3d  = True)
 
         # DD2
-        self.in_size_2 = 64 * 6 + 3
+        self.in_size_2 = 64 * 3 
         self.out_size_2 = 128
         layers2 = []
         layers2.append(Linear(self.in_size_2, self.out_size_2))
         layers2.append(ReLU())
         layers2.append(torch.nn.BatchNorm1d(self.out_size_2))
         dense3dnet2 = Sequential(*layers2)
-        self.dd2 = DD(l = self.l,
+        self.dd2 = DDm(l = self.l,
                         k = self.k,
                         mlp = dense3dnet2,
                         conv_p  = True,
