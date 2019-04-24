@@ -59,7 +59,7 @@ class Net(torch.nn.Module):
                         out_3d  = True)
 
         # DD2
-        self.in_size_2 = 64 * 3 
+        self.in_size_2 = 64 * 6 
         self.out_size_2 = 128
         layers2 = []
         layers2.append(Linear(self.in_size_2, self.out_size_2))
