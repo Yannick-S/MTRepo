@@ -30,7 +30,7 @@ class Net(torch.nn.Module):
 
         #train_info
         self.max_epochs = 301
-        self.save_every = 30
+        self.save_every = 100
 
         #model
         self.k = 20
@@ -59,7 +59,7 @@ class Net(torch.nn.Module):
                         out_3d  = True)
 
         # DD2
-        self.in_size_2 = 64 * 6 
+        self.in_size_2 = 64 * 3 + 3
         self.out_size_2 = 128
         layers2 = []
         layers2.append(Linear(self.in_size_2, self.out_size_2))
