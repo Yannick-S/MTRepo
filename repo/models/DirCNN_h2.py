@@ -70,7 +70,7 @@ class Net(torch.nn.Module):
         self.dd2 = DDm(l = self.l,
                         k = self.k,
                         mlp = dense3dnet2,
-                        conv_p  = True,
+                        conv_p  = False,
                         conv_fc = True,
                         conv_fn = True,
                         out_3d  = False)

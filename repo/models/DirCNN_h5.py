@@ -16,7 +16,7 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         #name
-        self.name = "DirCNN5"
+        self.name = "DirCNNh5"
         #optimizer
         self.lr = 0.001
         self.optimizer_name = 'Adam-Exp'

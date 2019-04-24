@@ -69,22 +69,20 @@ class DirectionalDense(MessagePassing):
             directional_features_central = directional_features_central.view(nr_points,self.k,-1)
 
         # concatenate the features and positions
-        #if self.conv_p:
-        #    concat = directional_clusters 
-        #    if self.conv_fn:
-        #        concat = torch.cat((concat, directional_features_neighbor), dim=2)
-        #    if self.conv_fc:
-        #        concat = torch.cat((concat, directional_features_central), dim=2)
-        #elif self.conv_fn:
-        #    concat = directional_features_neighbor 
-        #    if self.conv_fc:
-        #        concat = torch.cat((concat, directional_features_central), dim=2)
-        #else:
-        #    concat = directional_features_central
-        #concat = concat.view(nr_points * self.k, -1) # -1 = in_size to conv
-
-        concat = directional_features_neighbor - directional_features_central
+        if self.conv_p:
+            concat = directional_clusters 
+            if self.conv_fn:
+                concat = torch.cat((concat, directional_features_neighbor), dim=2)
+            if self.conv_fc:
+                concat = torch.cat((concat, directional_features_central), dim=2)
+        elif self.conv_fn:
+            concat = directional_features_central - directional_features_neighbor 
+            if self.conv_fc:
+                concat = torch.cat((concat, directional_features_central), dim=2)
+        else:
+            concat = directional_features_central
         concat = concat.view(nr_points * self.k, -1) # -1 = in_size to conv
+
 
         # do the inner NN
 
