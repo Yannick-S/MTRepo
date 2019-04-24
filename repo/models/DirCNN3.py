@@ -98,9 +98,6 @@ class Net(torch.nn.Module):
         #extract features in 3d
         _,_,features_dd, _ = self.dd(pos, edge_index, None)
 
-        with torch.no_grad():
-            edge_index = knn_graph(features_dd.view(pos.size(0), -1), self.k, batch, loop=False)
-
         _,_,features_dd2, _  = self.dd2(pos, edge_index, features_dd)
 
 
