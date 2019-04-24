@@ -9,3 +9,7 @@ img_conv/*
 __pycache__/*
 */__pycache__/*
 **/__pycache__/*
+
+
+results/h/results/*
+results/h/results/results(1).zip
