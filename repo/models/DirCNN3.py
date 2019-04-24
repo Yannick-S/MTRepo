@@ -24,12 +24,12 @@ class Net(torch.nn.Module):
         #data
         #self.data_name = "ModelNet10"
         self.data_name = "Geometry"
-        self.batch_size = 10
-        self.nr_points = 256 
+        self.batch_size = 20
+        self.nr_points = 1024
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 3000
+        self.max_epochs = 1000
         self.save_every = 100
 
         #model
@@ -152,10 +152,11 @@ class Net(torch.nn.Module):
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = CyclicLR(opt, 
-                           base_lr=0.000005,
-                           max_lr= 0.0001,
-                           step_size=20,
-                           mode='triangular'
+                           base_lr=0.0001,
+                           max_lr= 0.001,
+                           step_size=10,
+                           gamma=0.99,
+                           mode='exp_range'
                            )
             return opt, sch
                                          

@@ -44,7 +44,17 @@ def plot_grad2(param_history, show=False):
     if show:
         plt.show()
 
-def plot_hist_loss(training_history, color='dodgerblue', show=False):
+def plot_hist_loss(optimizer_history, color='fuchsia', show=False):
+    n = len(optimizer_history)
+    plt.plot(range(n), optimizer_history, color)
+    plt.xlim(0, n)
+    plt.xlabel('Epoch')
+    plt.ylabel('LR')
+    plt.title('Learning Rate')
+    if show:
+        plt.show()
+
+def plot_hist_lr(training_history, color='dodgerblue', show=False):
     n = len(training_history)
     plt.plot(range(n), training_history, color)
     plt.xlim(0, n)
