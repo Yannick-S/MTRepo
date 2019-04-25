@@ -18,7 +18,7 @@ class Net(torch.nn.Module):
         #name
         self.name = "DirCNN2"
         #optimizer
-        self.lr = 0.001*0.206
+        self.lr = 0.001
         self.optimizer_name = 'Adam-Exp'
 
         #data
