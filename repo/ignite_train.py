@@ -17,6 +17,7 @@ def run(model,
     loss_fn, 
     device, 
     train_loader, 
+    val_loader,
     training_history,
     param_history,
     model_info,
@@ -85,7 +86,7 @@ def run(model,
     trainer.add_event_handler(
             Events.EPOCH_COMPLETED,
             log_training_results,
-            evaluator, train_loader, training_history)
+            evaluator, val_loader, training_history)
 
     from event_handlers.save_model import handler_save_model
     trainer.add_event_handler(
