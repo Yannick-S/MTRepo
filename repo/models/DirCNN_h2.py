@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import knn_graph, graclus, avg_pool_x, max_pool_x 
+from torch_geometric.nn import knn_graph, fps
 
 import torch.nn.functional as F
 from .layers.directional_dense import DirectionalDense as DD
+from .layers.directional_dense_minus import DirectionalDense as DDm
 
 from torch.nn import Sequential , Linear , ReLU
 from utility.cyclic_lr import CyclicLR
@@ -16,22 +17,21 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         #name
-        self.name = "DirCNNgraclus"
+        self.name = "DirCNNh2"
         #optimizer
         self.lr = 0.001
         self.optimizer_name = 'Adam-Exp'
 
         #data
-        self.data_name = "ModelNet10"
-        #self.data_name = "Geometry"
+        #self.data_name = "ModelNet10"
+        self.data_name = "Geometry"
         self.batch_size = 20
         self.nr_points = 1024
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 60
-        self.save_every = 6
-        
+        self.max_epochs = 301
+        self.save_every = 100
 
         #model
         self.k = 20
@@ -58,7 +58,7 @@ class Net(torch.nn.Module):
                         conv_fc = False,
                         conv_fn = False,
                         out_3d  = True)
- 
+
         # DD2
         self.in_size_2 = 64 * 3 
         self.out_size_2 = 128
@@ -67,11 +67,11 @@ class Net(torch.nn.Module):
         layers2.append(ReLU())
         layers2.append(torch.nn.BatchNorm1d(self.out_size_2))
         dense3dnet2 = Sequential(*layers2)
-        self.dd2 = DD(l = self.l,
+        self.dd2 = DDm(l = self.l,
                         k = self.k,
                         mlp = dense3dnet2,
                         conv_p  = False,
-                        conv_fc = False,
+                        conv_fc = True,
                         conv_fn = True,
                         out_3d  = False)
 
@@ -99,24 +99,16 @@ class Net(torch.nn.Module):
         #extract features in 3d
         _,_,features_dd, _ = self.dd(pos, edge_index, None)
 
-        #
-        cluster = graclus(edge_index)
+        _,_,features_dd2, _  = self.dd2(pos, edge_index, features_dd)
 
-        pos_gra, batch_gra = avg_pool_x(cluster, pos, batch)
-        features_gra, _ = max_pool_x(cluster, features_dd, batch)
-
-        edge_index_gra = knn_graph(pos_gra, self.k, batch_gra, loop=False)
-
-        _,_,features_dd2, _  = self.dd2(pos_gra, edge_index_gra, features_gra)
 
         y1 = self.nn1(features_dd2)
+        y1 = y1.view(real_batch_size, self.nr_points, -1)
+        y1 = torch.max(y1, dim=1)[0]
+        y1 = torch.nn.functional.relu(y1)
+        y1 = self.bn1(y1)
 
-        y1_pool, _ = max_pool_x(batch_gra, y1, batch_gra)
-
-        y1_pool = torch.nn.functional.relu(y1_pool)
-        y1_pool = self.bn1(y1_pool)
-
-        y2 = self.nn2(y1_pool)
+        y2 = self.nn2(y1)
         y2 = torch.nn.functional.relu(y2)
         y2 = self.bn2(y2)
 
@@ -126,7 +118,6 @@ class Net(torch.nn.Module):
 
         y4 = self.nn4(y3)
         out = self.sm(y4)
-
         return out
     
     def get_info(self):
@@ -154,8 +145,8 @@ class Net(torch.nn.Module):
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = torch.optim.lr_scheduler.StepLR(opt,
-                                                  step_size=6,
-                                                  gamma=0.9)
+                                                  step_size=30,
+                                                  gamma=0.8)
 
             return opt, sch
         if self.optimizer_name == 'Adam-Tri':

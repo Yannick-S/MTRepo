@@ -8,10 +8,10 @@ if in_ipynb():
     #! git pull
     os.chdir("repo")
 
-load_from_file = False
+load_from_file = True
 start_epoch = 0
 #### prepare model
-import models.DirCNN3 as mod
+import models.DirCNN as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
@@ -24,11 +24,13 @@ model_info = model.get_info()
 optimizer, scheduler = model.get_optimizer()
 loss = torch.nn.NLLLoss()
 
+load_path = "/home/ys/Documents/MTRepo/repo/results/dirCnnnoG/epoch_00060.pth"
+
 #### load model
 import model_loader
 if in_ipynb(): importlib.reload(model_loader)
 if load_from_file:
-    model, optimizer, training_history, param_history, start_epoch, path = model_loader.load_model(model_info,model, optimizer)
+    model, optimizer, training_history, param_history, start_epoch, path = model_loader.load_model(model_info,model, optimizer, load_path)
 else:
     training_history, param_history, path = model_loader.else_load(model_info, model)
     
@@ -41,6 +43,9 @@ train_loader, val_loader = data_loader.data_from_data_info(model_info["data"])
 #### train
 import ignite_train
 if in_ipynb(): importlib.reload(ignite_train)
+
+print(max(training_history['acc']))
+quit()
 
 ignite_train.run(model, 
     optimizer,

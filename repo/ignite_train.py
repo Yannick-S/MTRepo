@@ -61,6 +61,14 @@ def run(model,
                                         device=device,
                                         prepare_batch=prep_batch)
 
+    optimizer_history = []
+    from event_handlers.log_lr import log_lr
+    trainer.add_event_handler(
+        Events.EPOCH_STARTED,
+        log_lr,
+        optimizer,
+        optimizer_history)
+
     from event_handlers.scheduler import do_scheduler
     trainer.add_event_handler(
         Events.EPOCH_STARTED,
@@ -89,7 +97,7 @@ def run(model,
     trainer.add_event_handler(
             Events.EPOCH_COMPLETED,
             log_img, 
-            model_info["training"]["save_every"], training_history, param_history, path, start_epoch)
+            model_info["training"]["save_every"], training_history, param_history, path, start_epoch,optimizer_history)
 
     pbar = tqdm(total=model_info["training"]["max_epochs"])
     @trainer.on(Events.EPOCH_COMPLETED)

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import knn_graph, graclus, avg_pool_x, max_pool_x 
+from torch_geometric.nn import knn_graph, fps
 
 import torch.nn.functional as F
 from .layers.directional_dense import DirectionalDense as DD
@@ -16,10 +16,10 @@ class Net(torch.nn.Module):
         super(Net, self).__init__()
 
         #name
-        self.name = "DirCNNgraclus"
+        self.name = "DirCNN3"
         #optimizer
         self.lr = 0.001
-        self.optimizer_name = 'Adam-Exp'
+        self.optimizer_name = 'Adam-Tri'
 
         #data
         self.data_name = "ModelNet10"
@@ -30,8 +30,7 @@ class Net(torch.nn.Module):
 
         #train_info
         self.max_epochs = 60
-        self.save_every = 6
-        
+        self.save_every = 3
 
         #model
         self.k = 20
@@ -58,7 +57,7 @@ class Net(torch.nn.Module):
                         conv_fc = False,
                         conv_fn = False,
                         out_3d  = True)
- 
+
         # DD2
         self.in_size_2 = 64 * 3 
         self.out_size_2 = 128
@@ -99,24 +98,16 @@ class Net(torch.nn.Module):
         #extract features in 3d
         _,_,features_dd, _ = self.dd(pos, edge_index, None)
 
-        #
-        cluster = graclus(edge_index)
+        _,_,features_dd2, _  = self.dd2(pos, edge_index, features_dd)
 
-        pos_gra, batch_gra = avg_pool_x(cluster, pos, batch)
-        features_gra, _ = max_pool_x(cluster, features_dd, batch)
-
-        edge_index_gra = knn_graph(pos_gra, self.k, batch_gra, loop=False)
-
-        _,_,features_dd2, _  = self.dd2(pos_gra, edge_index_gra, features_gra)
 
         y1 = self.nn1(features_dd2)
+        y1 = y1.view(real_batch_size, self.nr_points, -1)
+        y1 = torch.max(y1, dim=1)[0]
+        y1 = torch.nn.functional.relu(y1)
+        y1 = self.bn1(y1)
 
-        y1_pool, _ = max_pool_x(batch_gra, y1, batch_gra)
-
-        y1_pool = torch.nn.functional.relu(y1_pool)
-        y1_pool = self.bn1(y1_pool)
-
-        y2 = self.nn2(y1_pool)
+        y2 = self.nn2(y1)
         y2 = torch.nn.functional.relu(y2)
         y2 = self.bn2(y2)
 
@@ -126,7 +117,6 @@ class Net(torch.nn.Module):
 
         y4 = self.nn4(y3)
         out = self.sm(y4)
-
         return out
     
     def get_info(self):
@@ -154,7 +144,7 @@ class Net(torch.nn.Module):
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = torch.optim.lr_scheduler.StepLR(opt,
-                                                  step_size=6,
+                                                  step_size=2,
                                                   gamma=0.9)
 
             return opt, sch
@@ -162,10 +152,11 @@ class Net(torch.nn.Module):
             opt = torch.optim.Adam(self.parameters(), 
                             lr=self.lr)
             sch = CyclicLR(opt, 
-                           base_lr=0.00005,
-                           max_lr= 0.0002,
-                           step_size=200,
-                           mode='triangular'
+                           base_lr=0.0001,
+                           max_lr= 0.001,
+                           step_size=3,
+                           gamma=0.97,
+                           mode='exp_range'
                            )
             return opt, sch
                                          

@@ -57,7 +57,6 @@ class DirectionalDense(MessagePassing):
            directional_clusters[:,:,2] = directional_clusters[:,:,2] * signs.view(-1,1)
 
         # apply projection to features
-
         if self.conv_fn:
             clusters_feature_neighbor = features[edge_index[1,:]]
             clusters_feature_neighbor = clusters_feature_neighbor.view(nr_points, -1 ,3)
@@ -70,7 +69,6 @@ class DirectionalDense(MessagePassing):
             directional_features_central = directional_features_central.view(nr_points,self.k,-1)
 
         # concatenate the features and positions
-
         if self.conv_p:
             concat = directional_clusters 
             if self.conv_fn:
@@ -78,14 +76,16 @@ class DirectionalDense(MessagePassing):
             if self.conv_fc:
                 concat = torch.cat((concat, directional_features_central), dim=2)
         elif self.conv_fn:
-            concat = directional_features_neighbor 
+            concat = directional_features_central - directional_features_neighbor 
             if self.conv_fc:
                 concat = torch.cat((concat, directional_features_central), dim=2)
         else:
             concat = directional_features_central
         concat = concat.view(nr_points * self.k, -1) # -1 = in_size to conv
 
+
         # do the inner NN
+
         out = self.net(concat)
         out_size = out.size(1)
 
