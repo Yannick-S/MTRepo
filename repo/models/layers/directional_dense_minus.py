@@ -85,7 +85,6 @@ class DirectionalDense(MessagePassing):
 
 
         # do the inner NN
-        print(concat.size())
 
         out = self.net(concat)
         out_size = out.size(1)

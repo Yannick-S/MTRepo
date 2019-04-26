@@ -99,7 +99,6 @@ class Net(torch.nn.Module):
         #extract features in 3d
         _,_,features_dd, _ = self.dd(pos, edge_index, None)
         
-        print(features_dd.size())
         _,_,features_dd2, _  = self.dd2(pos, edge_index, features_dd)
 
 
