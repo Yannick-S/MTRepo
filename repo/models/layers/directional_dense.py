@@ -86,6 +86,7 @@ class DirectionalDense(MessagePassing):
         concat = concat.view(nr_points * self.k, -1) # -1 = in_size to conv
 
         # do the inner NN
+        
         out = self.net(concat)
         out_size = out.size(1)
 
