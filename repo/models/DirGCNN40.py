@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import knn_graph, fps
+from torch_geometric.nn import knn_graph, graclus, avg_pool_x, max_pool_x 
 
 import torch.nn.functional as F
 from .layers.directional_dense import DirectionalDense as DD
+from .layers.directional_dense_minus import DirectionalDense as DDm
 
 from torch.nn import Sequential , Linear , ReLU
 from utility.cyclic_lr import CyclicLR
@@ -24,7 +25,8 @@ class Net(torch.nn.Module):
         #data
         self.data_name = "ModelNet40"
         #self.data_name = "Geometry"
-        self.batch_size = 20
+        self.batch_size = 40
+
         self.nr_points = 1024
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
@@ -59,18 +61,18 @@ class Net(torch.nn.Module):
                         out_3d  = True)
 
         # DD2
-        self.in_size_2 = 64 * 3 
+        self.in_size_2 = 64 * 6
         self.out_size_2 = 128
         layers2 = []
         layers2.append(Linear(self.in_size_2, self.out_size_2))
         layers2.append(ReLU())
         layers2.append(torch.nn.BatchNorm1d(self.out_size_2))
         dense3dnet2 = Sequential(*layers2)
-        self.dd2 = DD(l = self.l,
+        self.dd2 = DDm(l = self.l,
                         k = self.k,
                         mlp = dense3dnet2,
                         conv_p  = False,
-                        conv_fc = False,
+                        conv_fc = True,
                         conv_fn = True,
                         out_3d  = False)
 
@@ -98,19 +100,28 @@ class Net(torch.nn.Module):
         #extract features in 3d
         _,_,features_dd, _ = self.dd(pos, edge_index, None)
 
+        #graclus
+        cluster = graclus(edge_index)
+
+        pos_gra, batch_gra = avg_pool_x(cluster, pos, batch)
+        features_gra, _ = max_pool_x(cluster, features_dd, batch)
+
+        #knn(f)
         with torch.no_grad():
-            edge_index = knn_graph(features_dd.view(pos.size(0), -1), self.k, batch, loop=False)
+            edge_index_gra = knn_graph(features_gra.norm(dim=2), self.k, batch_gra, loop=False)
 
-        _,_,features_dd2, _  = self.dd2(pos, edge_index, features_dd)
 
+        # DD2
+        _,_,features_dd2, _  = self.dd2(pos_gra, edge_index_gra, features_gra)
 
         y1 = self.nn1(features_dd2)
-        y1 = y1.view(real_batch_size, self.nr_points, -1)
-        y1 = torch.max(y1, dim=1)[0]
-        y1 = torch.nn.functional.relu(y1)
-        y1 = self.bn1(y1)
 
-        y2 = self.nn2(y1)
+        y1_pool, _ = max_pool_x(batch_gra, y1, batch_gra)
+
+        y1_pool = torch.nn.functional.relu(y1_pool)
+        y1_pool = self.bn1(y1_pool)
+
+        y2 = self.nn2(y1_pool)
         y2 = torch.nn.functional.relu(y2)
         y2 = self.bn2(y2)
 
@@ -120,6 +131,7 @@ class Net(torch.nn.Module):
 
         y4 = self.nn4(y3)
         out = self.sm(y4)
+
         return out
     
     def get_info(self):

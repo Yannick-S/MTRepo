@@ -11,7 +11,7 @@ if in_ipynb():
 load_from_file = True
 start_epoch = 0
 #### prepare model
-import models.DirCNN as mod
+import models.DirCNNgraclus as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
@@ -24,7 +24,7 @@ model_info = model.get_info()
 optimizer, scheduler = model.get_optimizer()
 loss = torch.nn.NLLLoss()
 
-load_path = "/home/ys/Documents/MTRepo/repo/results/new_resuilts/dircnn1/"
+load_path = "/home/ys/Documents/MasterThesis/report/img/new/gra/"
 load_path += "epoch_00060.pth"
 #### load model
 import model_loader
