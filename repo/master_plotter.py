@@ -11,7 +11,7 @@ if in_ipynb():
 load_from_file = True
 start_epoch = 0
 #### prepare model
-import models.DirCNNgraclus as mod
+import models.DirSplineCNN4 as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
@@ -24,8 +24,9 @@ model_info = model.get_info()
 optimizer, scheduler = model.get_optimizer()
 loss = torch.nn.NLLLoss()
 
-load_path = "/home/ys/Documents/MasterThesis/report/img/new/gra/"
-load_path += "epoch_00060.pth"
+
+load_path = "/home/j-pc-ub/Documents/MasterThesis/report/img/new/spline4/"
+load_path += "epoch_00040.pth"
 #### load model
 import model_loader
 if in_ipynb(): importlib.reload(model_loader)

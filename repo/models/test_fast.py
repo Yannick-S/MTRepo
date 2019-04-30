@@ -22,49 +22,17 @@ class Net(torch.nn.Module):
         self.optimizer_name = 'Adam-Exp'
 
         #data
-        self.data_name = "ModelNet40"
-        #self.data_name = "Geometry"
+        #self.data_name = "ModelNet40"
+        self.data_name = "Geometry"
         self.batch_size = 10
         self.nr_points = 1024
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
         self.max_epochs = 60
-        self.save_every = 6
+        self.save_every = 60
         
-
-        #model
-        self.k = 20
-        self.l = 7
-        
-        # DD1
-        self.in_size = 3
-        self.out_size = 64
-        layers = []
-        layers.append(Linear(self.in_size, 64))
-        layers.append(ReLU())
-        layers.append(torch.nn.BatchNorm1d(64))
-        layers.append(Linear(64, self.out_size))
-        layers.append(ReLU())
-        layers.append(torch.nn.BatchNorm1d(self.out_size))
-        dense3dnet = Sequential(*layers)
-        self.dd = DD(l = self.l,
-                        k = self.k,
-                        mlp = dense3dnet,
-                        conv_p  = True,
-                        conv_fc = False,
-                        conv_fn = False,
-                        out_3d  = False)
-        ## POOLING:
-        self.ratio = 0.25
-        self.nr_points_fps = self.nr_points * self.ratio
-        if self.nr_points * self.ratio % 1 != 0:
-            print("Not a good ratio!")
-        self.nr_points_fps = int(self.nr_points_fps)
-
-        self.nn1 = torch.nn.Linear(self.out_size, 512)
-        self.bn2 = torch.nn.BatchNorm1d(512)
-        self.nn4 = torch.nn.Linear(512, self.nr_classes)
+        self.nn1 = torch.nn.Linear(3, self.nr_classes)
 
         self.sm = torch.nn.LogSoftmax(dim=1)
 
@@ -75,25 +43,19 @@ class Net(torch.nn.Module):
         real_batch_size = pos.size(0) /self.nr_points
         real_batch_size = int(real_batch_size)
 
-        # Build first edges
-        edge_index = knn_graph(pos, self.k, batch, loop=False)
-
-        #extract features in 3d
-        _,_,features_dd, _ = self.dd(pos, edge_index, None)
-
-        index = fps(pos,batch=batch, ratio=self.ratio)
-        features_fps = features_dd[index]
-
-        y1 = self.nn1(features_fps)
-        y1 = y1.view(real_batch_size, self.nr_points_fps, -1)
+        print(pos.size())
+        y1 = self.nn1(pos)
+        print(y1.size())
+        y1 = y1.view(real_batch_size, -1 , self.nr_classes)
+        print(y1.size())
         y1 = torch.max(y1, dim=1)[0]
+        print(y1.size())
         y1 = torch.nn.functional.relu(y1)
+        print(y1.size())
     
-        y1 = self.bn2(y1)
-
-        y1 = self.nn4(y1)
         out = self.sm(y1)
-        print("his")
+        print(out.size())
+
         return out
     
     def get_info(self):
