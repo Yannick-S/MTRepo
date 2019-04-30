@@ -22,8 +22,8 @@ class Net(torch.nn.Module):
         self.optimizer_name = 'Adam-Exp'
 
         #data
-        #self.data_name = "ModelNet40"
-        self.data_name = "Geometry"
+        self.data_name = "ModelNet40"
+        #self.data_name = "Geometry"
         self.batch_size = 10
         self.nr_points = 1024
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
@@ -43,18 +43,12 @@ class Net(torch.nn.Module):
         real_batch_size = pos.size(0) /self.nr_points
         real_batch_size = int(real_batch_size)
 
-        print(pos.size())
         y1 = self.nn1(pos)
-        print(y1.size())
         y1 = y1.view(real_batch_size, -1 , self.nr_classes)
-        print(y1.size())
         y1 = torch.max(y1, dim=1)[0]
-        print(y1.size())
         y1 = torch.nn.functional.relu(y1)
-        print(y1.size())
     
         out = self.sm(y1)
-        print(out.size())
 
         return out
     
