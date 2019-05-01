@@ -90,7 +90,7 @@ class ModelNet40Loader(BaseDataLoader):
         dataset = dataset.shuffle()
         train_loader = DataLoader(dataset, batch_size=self.batch_size, drop_last=True)
 
-        dataset_val = ModelNet('data/mn10', name='10', train=False, transform=trans)
+        dataset_val = ModelNet('data/mn40', name='40', train=False, transform=trans)
         val_loader = DataLoader(dataset_val, batch_size=self.batch_size, drop_last=True)
 
 
