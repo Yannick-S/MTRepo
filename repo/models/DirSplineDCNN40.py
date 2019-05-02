@@ -32,8 +32,8 @@ class Net(torch.nn.Module):
         self.nr_classes = 10 if self.data_name == 'ModelNet10' else 40
 
         #train_info
-        self.max_epochs = 60
-        self.save_every = 1
+        self.max_epochs = 100
+        self.save_every = 2
 
         #model
         self.k = 20
