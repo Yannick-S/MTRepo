@@ -11,7 +11,7 @@ if in_ipynb():
 load_from_file = True
 start_epoch = 0
 #### prepare model
-import models.DirGCNN40 as mod
+import models.DirSplineDCNN40 as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
@@ -24,9 +24,9 @@ model_info = model.get_info()
 optimizer, scheduler = model.get_optimizer()
 loss = torch.nn.NLLLoss()
 
+load_path = "/home/ys/Documents/MasterThesis/report/img/new/dirdspline40/"
 
-load_path = "/home/ys/Documents/MasterThesis/report/img/new/dirdcnn40/"
-load_path += "epoch_00110.pth"
+load_path += "epoch_00100.pth"
 #### load model
 import model_loader
 if in_ipynb(): importlib.reload(model_loader)
