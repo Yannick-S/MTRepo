@@ -11,7 +11,7 @@ if in_ipynb():
 load_from_file = True
 start_epoch = 0
 #### prepare model
-import models.DirSplineCNN4 as mod
+import models.DirGCNN40 as mod
 if in_ipynb():
     import importlib
     importlib.reload(mod)
@@ -25,8 +25,8 @@ optimizer, scheduler = model.get_optimizer()
 loss = torch.nn.NLLLoss()
 
 
-load_path = "/home/j-pc-ub/Documents/MasterThesis/report/img/new/spline4/"
-load_path += "epoch_00040.pth"
+load_path = "/home/ys/Documents/MasterThesis/report/img/new/dirdcnn40/"
+load_path += "epoch_00110.pth"
 #### load model
 import model_loader
 if in_ipynb(): importlib.reload(model_loader)
@@ -45,8 +45,8 @@ train_loader, val_loader = data_loader.data_from_data_info(model_info["data"])
 import ignite_train
 if in_ipynb(): importlib.reload(ignite_train)
 
-print("loss:", min(training_history['nll']))
-print("acc:", max(training_history['acc']))
+print("loss:", min(training_history['nll'][50:]))
+print("acc:", max(training_history['acc'][50:]))
 quit()
 ignite_train.run(model, 
     optimizer,

@@ -20,7 +20,7 @@ class Net(torch.nn.Module):
         #name
         self.name = "DirSplineDCNN40"
         #optimizer
-        self.lr = 0.001
+        self.lr = 0.001*0.440126669
         self.optimizer_name = 'Adam-Exp'
 
         #data
